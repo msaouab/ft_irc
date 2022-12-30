@@ -11,3 +11,4 @@ Internet Relay Chat
 
 ## Resources
  - Internet Relay Chat Protocol ([Irc](https://www.rfc-editor.org/rfc/rfc1459));
+ - About Socket([Socket in C++](https://www.geeksforgeeks.org/socket-programming-cc/));
