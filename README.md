@@ -10,5 +10,15 @@ Internet Relay Chat
  - `This project is about creating your own IRC server.You will use an actual IRC client to connect to your server and test it.Internet is ruled by solid standards protocols that allow connected computers to interactwith each other.It’s always a good thing to know.Version: 6`
 
 ## Resources
- - Internet Relay Chat Protocol ([Irc](https://www.rfc-editor.org/rfc/rfc1459));
- - About Socket([Socket in C++](https://www.geeksforgeeks.org/socket-programming-cc/));
+ - Internet Relay Chat Protocol: ([Irc](https://www.rfc-editor.org/rfc/rfc1459));
+ - About Socket: ([Socket in C++](https://www.geeksforgeeks.org/socket-programming-cc/));
+ - What is a Socket?
+ - Unix Socket - Network Addresses
+ - Unix Socket - Core Functions
+ - [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/html/#intro);
+ - The UChicago χ-Projects
+ - Internet Relay Chat Protocol
+ - Internet Relay Chat: Architecture
+ - Internet Relay Chat: Channel Management
+ - Internet Relay Chat: Client Protocol
+ - Internet Relay Chat: Server Protocol

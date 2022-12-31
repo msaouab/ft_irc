@@ -12,6 +12,7 @@ CFLAGS = -I. -g3 -Wall -Werror
 LDFLAGS = 
 
 CC = gcc
+
 RM = rm -f
 
 ${NAME}:	${OBJS}
