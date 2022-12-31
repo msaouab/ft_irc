@@ -1,5 +1,5 @@
 # ft_irc
-	- Internet Relay Chat
+	Internet Relay Chat
 
 # Desciption
 
