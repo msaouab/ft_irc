@@ -1,3 +1,4 @@
+
 bold = $(shell tput bold)
 MAG = `tput setaf 5`
 RED = \033[1;31m
@@ -24,11 +25,12 @@ RM = rm -f
 all : credit $(NAME)
 
 credit:
-	@echo "$(MAG)\t╔══╦══╗╔══╗  ╔════╗$(ED)"
-	@echo "$(MAG)\t   ║   ║  ║  ║     $(ED)"
-	@echo "$(MAG)\t   ║   ╠══╩═╗║     $(ED)"
-	@echo "$(MAG)\t╚══╩══╝║    ║╚════╝$(ED)"
-	@echo "┃By:$(GREEN) msaouab - iqessam - ygbouri$(ED)┃\n"
+	@echo "\n"
+	@echo "$(MAG)\t\t╔══╦══╗╔══╗  ╔════╗$(ED)"
+	@echo "$(MAG)\t\t   ║   ║  ║  ║     $(ED)"
+	@echo "$(MAG)\t\t   ║   ╠══╩═╗║     $(ED)"
+	@echo "$(MAG)\t\t╚══╩══╝║    ║╚════╝$(ED)"
+	@echo "\t┃By:$(GREEN) msaouab - iqessam - ygbouri$(ED)┃\n"
 
 $(NAME): $(OBJ)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
