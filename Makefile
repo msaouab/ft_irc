@@ -1,5 +1,5 @@
 
-bold = $(shell tput bold)
+BOLD = $(shell tput BOLD)
 MAG = `tput setaf 5`
 RED = \033[1;31m
 GREEN = \033[1;32m
@@ -34,15 +34,15 @@ credit:
 
 $(NAME): $(OBJ)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
-		@echo " $(bold)$(MAG)Combilation Done.$(ED) $(LINE_CLEAR)"
+		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Combilation Done.$(ED)$(LINE_CLEAR)"
 		@$(RM) $(OBJ)
 
 clean: 
 		@$(RM) $(OBJ) $(OBJ_It) $(OBJ_Map) $(OBJ_RBT) $(OBJ_Vector) $(OBJ_Set) $(OBJ_Stack)
-		@echo " $(bold)$(MAG)clean Done.$(ED) $(LINE_CLEAR)"
+		@echo " $(BOLD)$(MAG)clean Done.$(ED) $(LINE_CLEAR)"
 
 fclean: clean
 		@$(RM) $(NAME) $(NAME_V) $(NAME_S) $(NAME_M) $(NAME_R) $(NAME_Se) $(NAME_I)
-		@echo " $(bold)$(MAG)fclean Done.$(ED) $(LINE_CLEAR)"
+		@echo "$(LINE_CLEAR)$(BOLD)$(MAG)fclean Done.$(ED) $(LINE_CLEAR)"
 
 re: fclean all
