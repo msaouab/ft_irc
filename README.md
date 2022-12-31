@@ -30,13 +30,13 @@
 
 # 💪 Contributers
 
-- [Mohamed SAOUAB](https://github.com/msaouab);
-	- [intra](https://profile.intra.42.fr/users/msaouab);
-- [Ilyass QESSAM](https://github.com/iqessam);
-	- [intra](https://profile.intra.42.fr/users/iqessam);
-- [Youssef GBOURI](https://github.com/ygbouri);
-	- [intra](https://profile.intra.42.fr/users/ygbouri);
-
+- [Mohamed SAOUAB](https://github.com/msaouab)
+	- [intra](https://profile.intra.42.fr/users/msaouab)
+- [Ilyass QESSAM](https://github.com/iqessam)
+	- [intra](https://profile.intra.42.fr/users/iqessam)
+- [Youssef GBOURI](https://github.com/ygbouri)
+	- [intra](https://profile.intra.42.fr/users/ygbouri)
+	
 # Resources
  - Internet Relay Chat Protocol: ([Irc](https://www.rfc-editor.org/rfc/rfc1459));
  - Internet Relay Chat: Architecture
