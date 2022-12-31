@@ -1,5 +1,5 @@
 bold = $(shell tput bold)
-magenta = `tput setaf 5`
+MAG = `tput setaf 5`
 RED = \033[1;31m
 GREEN = \033[1;32m
 YELLOW = \033[1;33m
@@ -24,22 +24,23 @@ RM = rm -f
 all : credit $(NAME)
 
 credit:
-	@echo "\t  ╔═╦═╗┌┐ ╔═╗"
-	@echo "\t    ║  ├┘┐║  "
-	@echo "\t  ╚═╩═╝┴ ┴╚═╝"
+	@echo "$(MAG)\t╔══╦══╗╔══╗  ╔════╗$(ED)"
+	@echo "$(MAG)\t   ║   ║  ║  ║     $(ED)"
+	@echo "$(MAG)\t   ║   ╠══╩═╗║     $(ED)"
+	@echo "$(MAG)\t╚══╩══╝║    ║╚════╝$(ED)"
 	@echo "┃By:$(GREEN) msaouab - iqessam - ygbouri$(ED)┃\n"
 
 $(NAME): $(OBJ)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
-		@echo " $(bold)$(magenta)Combilation Done.$(ED) $(LINE_CLEAR)"
+		@echo " $(bold)$(MAG)Combilation Done.$(ED) $(LINE_CLEAR)"
 		@$(RM) $(OBJ)
 
 clean: 
 		@$(RM) $(OBJ) $(OBJ_It) $(OBJ_Map) $(OBJ_RBT) $(OBJ_Vector) $(OBJ_Set) $(OBJ_Stack)
-		@echo " $(bold)$(magenta)clean Done.$(ED) $(LINE_CLEAR)"
+		@echo " $(bold)$(MAG)clean Done.$(ED) $(LINE_CLEAR)"
 
 fclean: clean
 		@$(RM) $(NAME) $(NAME_V) $(NAME_S) $(NAME_M) $(NAME_R) $(NAME_Se) $(NAME_I)
-		@echo " $(bold)$(magenta)fclean Done.$(ED) $(LINE_CLEAR)"
+		@echo " $(bold)$(MAG)fclean Done.$(ED) $(LINE_CLEAR)"
 
 re: fclean all
