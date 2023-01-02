@@ -1,3 +1,4 @@
+
 # include "../Includes/ircserv.hpp"
 
 bool isNumber(std::string str)

@@ -1,3 +1,4 @@
+NAME = ircserv
 
 NAME = ircserv
 

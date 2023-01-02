@@ -12,6 +12,7 @@
 # include <ctype.h>
 
 #include "./server.hpp"
+bool	isNumber(std::string str);
 
 bool	isNumber(std::string str);
 
