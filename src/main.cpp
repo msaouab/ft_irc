@@ -1,17 +1,6 @@
 
 #include "../Includes/ircserv.hpp"
 
-bool isNumber(std::string str)
-{
-	int i = 0;
-    while ( str[i]) {
-        if (std::isdigit(str[i]) == 0)
-            return false;
-		i++;
-    }
-    return true;
-}
-
 int	main(int ac, char **av)
 {
 	if (ac != 3) {
@@ -20,13 +9,22 @@ int	main(int ac, char **av)
 		std::cout << ED << "'.\n" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	if (!isNumber(av[1])) {
+	std::string port = av[1];
+	std::string password = av[2];
+	if (!isNumber(av[1]) || !port.size() || !password.size())
+	 {
 		std::cout << "\nERROR: " << GRAY;
-		std::cout << "ENTER THE CORRECT PORT.\n" << ED << std::endl;
+		std::cout << "ENTER THE CORRECT PORT AND PASSWORD.\n" << ED << std::endl;
+		exit(EXIT_FAILURE);
 	}
-	// try {
-	// }
-	// catch(const std::exception& e) {
-	// 	std::cerr << e.what() << std::endl;
-	// }
+	server my_server;
+	std::cout << my_server.getPassword() << std::endl; 
+	try
+	{
+		my_server.setPort(stoi(port)); 
+		my_server.setPassword(password);
+	}
+	catch(const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+	}
 }

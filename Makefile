@@ -1,3 +1,4 @@
+NAME = ircserv
 
 BOLD = $(shell tput bold)
 MAG = `tput setaf 5`
@@ -8,19 +9,17 @@ BLUE = \033[1;34m
 ED = \033[0m
 LINE_CLEAR = \x1b[1A\x1b[M
 
-NAME = ircserv
+CC = c++ -std=c++98
+CFLAGS = -Wall -Wextra -Werror
+RM = rm -f
 
-SRC =	./src/main.cpp
+SRC =	./src/main.cpp\
+		./src/server.cpp\
+		./src/utils.cpp
 
 HEADERS = Includes/ircserv.hpp
 
 OBJ = $(SRC:.cpp=.o)
-
-CC = c++ -std=c++98
-
-CFLAGS = -Wall -Wextra -Werror
-
-RM = rm -f
 
 all : credit $(NAME)
 
@@ -34,7 +33,7 @@ credit:
 
 $(NAME): $(OBJ) $(HEADERS)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
-		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)$(LINE_CLEAR)"
+		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)"
 
 clean: 
 		@$(RM) $(OBJ)
@@ -45,3 +44,5 @@ fclean: clean
 		@echo "$(LINE_CLEAR)$(BOLD)$(MAG)fclean Done.$(ED) $(LINE_CLEAR)"
 
 re: fclean all
+
+.PHONY: all clean fclean re
