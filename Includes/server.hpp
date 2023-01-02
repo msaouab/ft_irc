@@ -16,6 +16,10 @@ class server
 		std::string	getPassword() const;
 		void		setPort(int port);
 		void		setPassword(std::string password);
+		class ErrorPortException : public std::exception
+		{
+			const char *what() const throw();
+		};
 };
 
 #endif /* _SERVER_HPP__ */
