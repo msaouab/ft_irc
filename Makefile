@@ -32,10 +32,9 @@ credit:
 	@echo "$(MAG)\t\t╚══╩══╝║    ║╚════╝$(ED)"
 	@echo "\t┃By:$(GREEN) msaouab - iqessam - ygbouri$(ED)┃\n\n"
 
-$(NAME): $(OBJ)
+$(NAME): $(OBJ) $(HEADERS)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
-		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Combilation Done.$(ED)$(LINE_CLEAR)"
-		@$(RM) $(OBJ)
+		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)$(LINE_CLEAR)"
 
 clean: 
 		@$(RM) $(OBJ)
