@@ -10,7 +10,9 @@ LINE_CLEAR = \x1b[1A\x1b[M
 
 NAME = ircserv
 
-SRC =	./src/main.cpp
+SRC =	./src/main.cpp\
+		./src/server.cpp\
+		./src/utils.cpp
 
 HEADERS = Includes/ircserv.hpp
 
@@ -34,7 +36,7 @@ credit:
 
 $(NAME): $(OBJ) $(HEADERS)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
-		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)$(LINE_CLEAR)"
+		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)"
 
 clean: 
 		@$(RM) $(OBJ)
