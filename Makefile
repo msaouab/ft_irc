@@ -1,5 +1,7 @@
 NAME = ircserv
 
+NAME = ircserv
+
 BOLD = $(shell tput bold)
 MAG = `tput setaf 5`
 RED = \033[1;31m

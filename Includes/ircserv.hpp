@@ -14,4 +14,6 @@
 #include "./server.hpp"
 bool	isNumber(std::string str);
 
+bool	isNumber(std::string str);
+
 #endif /* _IRC_SERV_HPP__ */
