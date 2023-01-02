@@ -49,3 +49,20 @@
  - Unix Socket - Core Functions
  - [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/html/#intro);
  - The UChicago χ-Projects
+Server creation: https://www.ibm.com/docs/en/i/7.4?topic=designs-using-poll-instead-select
+some helpful resources:
+
+https://ncona.com/2019/04/building-a-simple-server-with-cpp/
+
+https://modern.ircdocs.horse/#message-format
+
+https://ircv3.net/irc/
+
+http://chi.cs.uchicago.edu/chirc/index.html
+
+https://www.ibm.com/docs/en/i/7.4?topic=ssw_ibm_i_74/apis/ioctl.htm
+https://www.ibm.com/docs/en/i/7.4?topic=ssw_ibm_i_74/apis/poll.htm
+https://www.ibm.com/docs/en/i/7.4?topic=ssw_ibm_i_74/apis/ssocko.htm
+https://www.ibm.com/docs/en/i/7.4?topic=ssw_ibm_i_74/apis/accept.htm
+https://pubs.opengroup.org/onlinepubs/000095399/functions/setsockopt.html
+https://ircv3.net/irc/
