@@ -12,7 +12,7 @@ int	main(int ac, char **av)
 	std::string port = av[1];
 	std::string password = av[2];
 	if (!isNumber(av[1]) || !port.size() || !password.size())
-	 {
+	{
 		std::cout << "\nERROR: " << GRAY;
 		std::cout << "ENTER THE CORRECT PORT AND PASSWORD.\n" << ED << std::endl;
 		exit(EXIT_FAILURE);
