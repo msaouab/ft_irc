@@ -26,3 +26,8 @@ void server::setPassword(std::string password)
 {
     this->password = password;
 }
+
+const char* server::ErrorPortException::what() const throw()
+{
+	return("\033[1;31m Error in Port number \033[0m");
+}
