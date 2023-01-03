@@ -3,7 +3,6 @@
 
 int	main(int ac, char **av)
 {
-	server my_server;
 
 	if (ac != 3) {
 		std::cout << "\nYou need to respect this Format: '";
@@ -19,6 +18,7 @@ int	main(int ac, char **av)
 		std::cout << "ENTER THE CORRECT PORT AND PASSWORD.\n" << ED << std::endl;
 		exit(EXIT_FAILURE);
 	}
+	server my_server(stoi(port), av[2]);
 	try
 	{
 		my_server.setPort(stoi(port));

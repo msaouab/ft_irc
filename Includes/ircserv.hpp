@@ -21,8 +21,11 @@
 # include <sys/time.h>
 # include <netinet/in.h>
 # include <errno.h>
+# include <unistd.h>
 
 # include "./server.hpp"
+
+// struct sockaddr_in	address;
 
 bool	isNumber(std::string str);
 
