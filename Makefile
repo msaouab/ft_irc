@@ -1,4 +1,3 @@
-NAME = ircserv
 
 NAME = ircserv
 
@@ -26,12 +25,13 @@ OBJ = $(SRC:.cpp=.o)
 all : credit $(NAME)
 
 credit:
-	@echo "\n"
-	@echo "$(MAG)\t\t╔══╦══╗╔══╗  ╔════╗$(ED)"
-	@echo "$(MAG)\t\t   ║   ║  ║  ║     $(ED)"
-	@echo "$(MAG)\t\t   ║   ╠══╩═╗║     $(ED)"
-	@echo "$(MAG)\t\t╚══╩══╝║    ║╚════╝$(ED)"
-	@echo "\t┃By:$(GREEN) msaouab - iqessam - ygbouri$(ED)┃\n\n"
+	@echo "\n$(BLUE)\t███████████████████████████████████████"
+	@echo "$(BLUE)\t█ $(YELLOW)╔════╗╔══╦══╗   ╔══╦══╗╔══╗  ╔════╗$(ED) $(BLUE)█$(ED)"
+	@echo "$(BLUE)\t█ $(YELLOW)║        ║         ║   ║  ║  ║     $(ED) $(BLUE)█$(ED)"
+	@echo "$(BLUE)\t█ $(YELLOW)╠════    ║         ║   ╠══╩═╗║     $(ED) $(BLUE)█$(ED)"
+	@echo "$(BLUE)\t█ $(YELLOW)║        ║ ════ ╚══╩══╝║    ║╚════╝$(ED) $(BLUE)█$(ED)"
+	@echo "$(BLUE)\t█  ┃By:$(GREEN) msaouab - iqessam - ygbouri$(ED)$(BLUE)┃  █$(ED)"
+	@echo "$(BLUE)\t███████████████████████████████████████\n\n$(ED)"
 
 $(NAME): $(OBJ) $(HEADERS)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
