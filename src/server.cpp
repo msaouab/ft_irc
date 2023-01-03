@@ -42,6 +42,7 @@ void	server::start()
 	int					new_sd;
 	int					len;
 	bool				close_conn;
+	socklen_t			addrLen;
 
 	opt = 1;
 	n_fds = 1;
@@ -82,7 +83,7 @@ void	server::start()
 		close(sock_fd);
 		exit(EXIT_FAILURE);
 	}
-	// this->addrLen = sizeof(address);
+	addrLen = sizeof(address);
 	memset(fds, 0, sizeof(fds));
 	std::cout << "Looking For Connections" << std::endl;
 	fds[0].fd = sock_fd;
@@ -99,7 +100,6 @@ void	server::start()
 		/* Call poll() and wait 10 minutes for it to complete.     */
 		/***********************************************************/
 		std::cout << "Waiting on poll()...\n" << std::endl;
-			std::cout << "yes keep work  " << sock_fd << "\n";
 		setsock = poll(fds, n_fds, timeout);
 		if (setsock < 0) {
 			std::cout << "poll() failed: " << strerror(errno) << '\n';
@@ -109,8 +109,6 @@ void	server::start()
 			std::cout << GRAY << "poll() timeout. End Program.\n" << ED << std::endl;
 			break ;
 		}
-		// else {
-		// }
 		current_size = n_fds;
 		for (int i = 0; i < current_size; i++) {
 			if (fds[i].revents == 0)
@@ -123,7 +121,7 @@ void	server::start()
 			if (fds[i].fd == sock_fd) {
 				std::cout << "Listening Socker is readable\n" << std::endl;
 				while (new_sd != -1) {
-					new_sd = accept(sock_fd, nullptr, nullptr);
+					new_sd = accept(sock_fd, (struct sockaddr *)&address, &addrLen);
 					if (new_sd < 0) {
 						if (errno != EWOULDBLOCK) {
 							std::cout << "accept() failed: " << strerror(errno) << '\n'<< std::endl;
