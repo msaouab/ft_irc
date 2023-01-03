@@ -13,9 +13,16 @@
 # include <stdlib.h>
 # include <algorithm>
 # include <ctype.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <sys/ioctl.h>
+# include <sys/poll.h>
+# include <sys/socket.h>
+# include <sys/time.h>
+# include <netinet/in.h>
+# include <errno.h>
 
-#include "./server.hpp"
-bool	isNumber(std::string str);
+# include "./server.hpp"
 
 bool	isNumber(std::string str);
 

@@ -16,6 +16,7 @@ class server
 		std::string	getPassword() const;
 		void		setPort(int port);
 		void		setPassword(std::string password);
+		void		start();
 };
 
 #endif /* _SERVER_HPP__ */

@@ -26,3 +26,9 @@ void server::setPassword(std::string password)
 {
     this->password = password;
 }
+
+void	server::start()
+{
+	while (true)
+	{}
+}
