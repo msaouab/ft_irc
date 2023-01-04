@@ -22,6 +22,7 @@
 # include <netinet/in.h>
 # include <errno.h>
 # include <unistd.h>
+# include <fcntl.h>
 
 # include "./server.hpp"
 
