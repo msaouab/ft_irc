@@ -12,7 +12,6 @@ class server
 		int			port;
 		int			sock_fd;
 		int			setsock;
-		int			addrLen;
 		int			timeout;
 		std::string	password;
 		std::string	buffer[80];
