@@ -44,6 +44,7 @@ void	server::start()
 	bool				close_conn;
 	bool				compress_arr;
 	socklen_t			addrLen;
+	char				buffer[1024];
 
 	opt = 1;
 	n_fds = 1;
@@ -157,7 +158,8 @@ void	server::start()
 					setsock = recv(fds[i].fd, buffer, sizeof(buffer), 0);
 					// std::cout  << "setsocket : " << setsock << std::endl;
 					buffer[setsock] = '\0';
-					std::cout  << "recieved : " << &buffer << std::endl;
+					std::cout  << "buffer.size() : " << strlen(buffer) << std::endl;
+					std::cout  << "recieved : " << buffer;
 					if (setsock < 0) {
 						if (errno != EWOULDBLOCK) {
 							std::cout << "recv() failed " << strerror(errno) << '\n' << std::endl;
@@ -182,12 +184,12 @@ void	server::start()
 					/*****************************************************/
 					/* Echo the data back to the client                  */
 					/*****************************************************/
-					setsock = send(fds[i].fd, buffer, len, 0);
-					if (setsock < 0) {
-						std::cout << "send() failed\n" << std::endl;
-						close_conn = true;
-						break ;
-					}
+					// setsock = send(fds[i].fd, buffer, len, 0);
+					// if (setsock < 0) {
+					// 	std::cout << "send() failed\n" << std::endl;
+					// 	close_conn = true;
+					// 	break ;
+					// }
 				} while (true);
 				if (close_conn) {
 					close(fds[i].fd);

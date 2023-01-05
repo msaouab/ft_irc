@@ -14,7 +14,6 @@ class server
 		int			setsock;
 		int			timeout;
 		std::string	password;
-		std::string	buffer[80];
 		bool		End_server;
 	public:
 		server();
