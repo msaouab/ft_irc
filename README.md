@@ -50,6 +50,7 @@
  - [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/html/#intro);
  - The UChicago χ-Projects
  - [Server creation by IBM](https://www.ibm.com/docs/en/i/7.4?topic=designs-using-poll-instead-select).
+ - [sockaddr_in struct](https://www.gta.ufrj.br/ensino/eel878/sockets/sockaddr_inman.html).
  - some helpful resources:
  	- https://ncona.com/2019/04/building-a-simple-server-with-cpp/
 	- https://modern.ircdocs.horse/#message-format

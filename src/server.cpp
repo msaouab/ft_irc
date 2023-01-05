@@ -65,6 +65,8 @@ void	server::start()
 	setsock = fcntl(sock_fd, F_SETFL, O_NONBLOCK);
 	if (setsock < 0) {
 		std::cout << "fcntl() failed: " << strerror(errno) << '\n';
+		close(sock_fd);
+		exit(EXIT_FAILURE);
 	}
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
