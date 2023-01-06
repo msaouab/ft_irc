@@ -32,26 +32,11 @@ void server::setPassword(std::string password)
     this->password = password;
 }
 
-void	server::start()
+void	server::CreateSocket()
 {
-	struct sockaddr_in	address;
-	struct pollfd		fds[200];
 	int					opt;
-	int					n_fds;
-	int					current_size;
-	int					new_sd;
-	int					len;
-	bool				close_conn;
-	bool				compress_arr;
-	socklen_t			addrLen;
-	char				buffer[1024];
 
 	opt = 1;
-	n_fds = 1;
-	current_size = 0;
-	new_sd = -1;
-	End_server = false;
-	compress_arr = false;
 	sock_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock_fd < 0) {
 		std::cout << "Socket() failed: " << strerror(errno) << '\n';
@@ -69,22 +54,19 @@ void	server::start()
 		close(sock_fd);
 		exit(EXIT_FAILURE);
 	}
+}
+
+void	server::bindThesocket()
+{
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons(port);
-	/*************************************************************/
-	/* Bind the socket                                           */
-	/*************************************************************/
-	// memset(&address, 0, sizeof(address));
 	setsock = bind(sock_fd, (struct sockaddr *)&address, sizeof(address));
 	if (setsock < 0) {
 		std::cout << "bind() failed: " << strerror(errno) << '\n';
 		close(sock_fd);
 		exit(EXIT_FAILURE);
 	}
-	/*************************************************************/
-	/* Set the listen back log                                   */
-	/*************************************************************/
 	setsock = listen(sock_fd, 3);
 	if (setsock < 0) {
 		std::cout << "listen() failed: " << strerror(errno) << '\n';
@@ -96,120 +78,120 @@ void	server::start()
 	std::cout << "Looking For Connections" << std::endl;
 	fds[0].fd = sock_fd;
 	fds[0].events = POLLIN;
-	/*************************************************************/
-	/* Initialize the timeout to 10 minutes. If no               */
-	/* activity after 10 minutes this program will end.          */
-	/* timeout value is based on milliseconds.                   */
-	/*************************************************************/
-	timeout = (10 * 60 * 1000);
+}
+
+bool	server::WaitClient()
+{
+	std::cout << "Waiting on poll()...\n" << std::endl;
+	setsock = poll(fds, n_fds, TIMEOUT);
+	if (setsock < 0) {
+		std::cout << "poll() failed: " << strerror(errno) << '\n';
+		return (false) ;
+	}
+	if (setsock == 0) {
+		std::cout << GRAY << "poll() timeout. End Program.\n" << ED << std::endl;
+		return (false) ;
+	}
+	return (true);
+}
+
+int	server::acceptSocket(int n_fds)
+{
+	int	new_sd;
+
+	new_sd = -1;
+	while (new_sd == -1) {
+		new_sd = accept(sock_fd, (struct sockaddr *)&address, &addrLen);
+		if (new_sd < 0) {
+			if (errno != EWOULDBLOCK) {
+				std::cout << "accept() failed: " << strerror(errno) << '\n'<< std::endl;
+				End_server = true;
+			}
+			break ;
+		}
+		std::cout << "New incomming connection ==> " << new_sd << std::endl;
+		fds[n_fds].fd = new_sd;
+		fds[n_fds].events = POLLIN;
+		n_fds++;
+	}
+	return (n_fds);
+}
+
+bool	server::recvMessage(char *buffer, int i)
+{
+	setsock = recv(fds[i].fd, buffer, sizeof(buffer), 0);
+	buffer[setsock] = '\0';
+	std::cout  << "buffer.size() : " << strlen(buffer) << std::endl;
+	std::cout  << "recieved : " << buffer;
+	if (setsock < 0) {
+		if (errno != EWOULDBLOCK) {
+			std::cout << "recv() failed " << strerror(errno) << '\n' << std::endl;
+			st_conx = true;
+		}
+		return (false);
+	}
+	if (setsock == 0) {
+		std::cout << "Connection closed\n" << std::endl;;
+		st_conx = true;
+		return (false);
+	}
+	// std::cout << setsock << " Bytes received\n" << std::endl;
+	return (true);
+}
+
+void	server::sendMessage()
+{
+	int	len;
+
+	len = setsock;
+	// setsock = send(fds[i].fd, buffer, len, 0);
+	// if (setsock < 0) {
+	// 	std::cout << "send() failed\n" << std::endl;
+	// 	st_conx = true;
+	// 	break ;
+	// }
+}
+
+void	server::start()
+{
+	
+	int					current_size;
+	bool				compress_arr;
+	char				buffer[1024];
+
+	n_fds = 1;
+	current_size = 0;
+	End_server = false;
+	compress_arr = false;
+	CreateSocket();
+	bindThesocket();
 	while (!End_server) {
-		/***********************************************************/
-		/* Call poll() and wait 10 minutes for it to complete.     */
-		/***********************************************************/
-		std::cout << "Waiting on poll()...\n" << std::endl;
-		setsock = poll(fds, n_fds, timeout);
-		if (setsock < 0) {
-			std::cout << "poll() failed: " << strerror(errno) << '\n';
+		if (WaitClient() == false)
 			break ;
-		}
-		if (setsock == 0) {
-			std::cout << GRAY << "poll() timeout. End Program.\n" << ED << std::endl;
-			break ;
-		}
 		current_size = n_fds;
-		for (int i = 0; i < current_size; i++) {
+		for (int i = 0; i < MAX_CLIENT; i++) {
 			if (fds[i].revents == 0)
 				continue ;
-			if (fds[i].revents != POLLIN) {
-				std::cout << "Error! revents ==> " << fds[i].revents << '\n' << std::endl;
-				End_server = true;
-				break ;
-			}
 			if (fds[i].fd == sock_fd) {
 				std::cout << "Listening Socker is readable\n" << std::endl;
-				do {
-					new_sd = accept(sock_fd, (struct sockaddr *)&address, &addrLen);
-					if (new_sd < 0) {
-						if (errno != EWOULDBLOCK) {
-							std::cout << "accept() failed: " << strerror(errno) << '\n'<< std::endl;
-							End_server = true;
-						}
-						break ;
-					}
-					/*****************************************************/
-					/* Add the new incoming connection to the            */
-					/* pollfd structure                                  */
-					/*****************************************************/
-					std::cout << "New incomming connection ==> " << new_sd << std::endl;
-					fds[n_fds].fd = new_sd;
-					fds[n_fds].events = POLLIN;
-					n_fds++;
-					/*****************************************************/
-					/* Loop back up and accept another incoming          */
-					/* connection                                        */
-					/*****************************************************/
-				} while (new_sd != -1);
+				n_fds = acceptSocket(n_fds);
 			}
 			else {
-					// std::cout  << "setsocket : " << setsock << std::endl;
 				std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
-				close_conn = false;
+				st_conx = false;
 				do {
-					setsock = recv(fds[i].fd, buffer, sizeof(buffer), 0);
-					// std::cout  << "setsocket : " << setsock << std::endl;
-					buffer[setsock] = '\0';
-					std::cout  << "buffer.size() : " << strlen(buffer) << std::endl;
-					std::cout  << "recieved : " << buffer;
-					if (setsock < 0) {
-						if (errno != EWOULDBLOCK) {
-							std::cout << "recv() failed " << strerror(errno) << '\n' << std::endl;
-							close_conn = true;
-						}
+					if (recvMessage(buffer, i) == false)
 						break ;
-					}
-					/*****************************************************/
-					/* Check to see if the connection has been           */
-					/* closed by the client                              */
-					/*****************************************************/
-					if (setsock == 0) {
-						std::cout << "Connection closed\n" << std::endl;;
-						close_conn = true;
-						break ;
-					}
-					/*****************************************************/
-					/* Data was received                                 */
-					/*****************************************************/
-					len = setsock;
-					std::cout << len << " Bytes received\n" << std::endl;
-					/*****************************************************/
-					/* Echo the data back to the client                  */
-					/*****************************************************/
-					// setsock = send(fds[i].fd, buffer, len, 0);
-					// if (setsock < 0) {
-					// 	std::cout << "send() failed\n" << std::endl;
-					// 	close_conn = true;
-					// 	break ;
-					// }
+					sendMessage();
 				} while (true);
-				if (close_conn) {
+				if (st_conx) {
 					close(fds[i].fd);
 					fds[i].fd = -1;
 					compress_arr = true;
 				}
 			}
 		}
-		// if (compress_arr) {
-		// 	for (int i = 0; i < n_fds; i++) {
-		// 		if (fds[i].fd == -1) {
-		// 			for (int j = i; j < n_fds - 1; j++)
-		// 				fds[j].fd = fds[j + 1].fd;
-		// 			i--;
-		// 			n_fds--;
-		// 		}
-		// 	}
-		// }
 	}
-
 }
 
 const char* server::ErrorPortException::what() const throw()
