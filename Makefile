@@ -25,13 +25,12 @@ OBJ = $(SRC:.cpp=.o)
 all : credit $(NAME)
 
 credit:
-	@echo "\n$(BLUE)\t███████████████████████████████████████"
-	@echo "$(BLUE)\t█ $(YELLOW)╔════╗╔══╦══╗   ╔══╦══╗╔══╗  ╔════╗$(ED) $(BLUE)█$(ED)"
-	@echo "$(BLUE)\t█ $(YELLOW)║        ║         ║   ║  ║  ║     $(ED) $(BLUE)█$(ED)"
-	@echo "$(BLUE)\t█ $(YELLOW)╠════    ║         ║   ╠══╩═╗║     $(ED) $(BLUE)█$(ED)"
-	@echo "$(BLUE)\t█ $(YELLOW)║        ║ ════ ╚══╩══╝║    ║╚════╝$(ED) $(BLUE)█$(ED)"
-	@echo "$(BLUE)\t█  ┃By:$(GREEN) msaouab - iqessam - ygbouri$(ED)$(BLUE)┃  █$(ED)"
-	@echo "$(BLUE)\t███████████████████████████████████████\n\n$(ED)"
+	@echo "$(GREEN)\t╔════╗╔══╦══╗   ╔══╦══╗╔══╗  ╔════╗$(ED)"
+	@echo "$(GREEN)\t║        ║         ║   ║  ║  ║     $(ED)"
+	@echo "$(GREEN)\t╠════    ║         ║   ╠══╩═╗║     $(ED)"
+	@echo "$(GREEN)\t║        ║ ════ ╚══╩══╝║    ║╚════╝$(ED)"
+	@echo "$(GREEN)\t ┃$(ED)By: $(MAG)msaouab - iqessam - ygbouri$(GREEN)┃$(ED)"
+	@echo "$(GREEN)\t███████████████████████████████████\n\n$(ED)"
 
 $(NAME): $(OBJ) $(HEADERS)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
