@@ -121,8 +121,10 @@ bool	server::recvMessage(char *buffer, int i)
 {
 	setsock = recv(fds[i].fd, buffer, sizeof(buffer), 0);
 	buffer[setsock] = '\0';
-	std::cout  << "buffer.size() : " << strlen(buffer) << std::endl;
-	std::cout  << "recieved : " << buffer;
+	// std::cout  << "buffer.size() : " << strlen(buffer) << std::endl;
+	// std::cout  << "recieved : " << buffer;
+	std::string input = buffer;
+	parse_command(input, getPassword());
 	if (setsock < 0) {
 		if (errno != EWOULDBLOCK) {
 			std::cout << "recv() failed " << strerror(errno) << '\n' << std::endl;

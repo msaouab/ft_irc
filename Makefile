@@ -16,7 +16,8 @@ RM = rm -f
 
 SRC =	./src/main.cpp\
 		./src/server.cpp\
-		./src/utils.cpp
+		./src/utils.cpp\
+		./src/command_pars.cpp
 
 HEADERS = Includes/ircserv.hpp
 

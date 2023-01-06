@@ -45,5 +45,7 @@ class server
 			const char *what() const throw();
 		};
 };
+		void		parse_command(std::string input, std::string password);
+		void 		password_check(std::string input, std::string password);
 
 #endif /* _SERVER_HPP__ */
