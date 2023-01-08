@@ -7,6 +7,7 @@ server::server() {
 server::server(int _port, std::string _pswd) {
 	this->port = _port;
 	this->password = _pswd;
+	this->n_fds = 1;
 }
 
 server::~server() {
@@ -117,14 +118,17 @@ int	server::acceptSocket(int n_fds)
 	return (n_fds);
 }
 
-bool	server::recvMessage(char *buffer, int i)
+// std::string	joinrecv(char *buffer)
+// {
+
+// }
+
+bool	server::recvMessage(int i)
 {
-	setsock = recv(fds[i].fd, buffer, sizeof(buffer), 0);
-	buffer[setsock] = '\0';
-	// std::cout  << "buffer.size() : " << strlen(buffer) << std::endl;
-	// std::cout  << "recieved : " << buffer;
-	std::string input = buffer;
-	parse_command(input, getPassword());
+	char		buffer[DEFAULT_BUFLEN];
+	std::string	input;
+
+	setsock = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
 	if (setsock < 0) {
 		if (errno != EWOULDBLOCK) {
 			std::cout << "recv() failed " << strerror(errno) << '\n' << std::endl;
@@ -137,7 +141,17 @@ bool	server::recvMessage(char *buffer, int i)
 		st_conx = true;
 		return (false);
 	}
-	// std::cout << setsock << " Bytes received\n" << std::endl;
+	buffer[setsock] = '\0';
+	// std::cout << "buffer here ==>" << buffer;
+	// std::cout << "\nlast buffer here ==>" << (int)buffer[setsock - 1] << ' ' << (int)buffer[setsock - 2] << '\n';
+	input = strtok(buffer, "\r\n");
+	// std::cout << "input here ==>" << input;
+	// std::cout << "\nlast input here ==>" << (int)input[setsock - 1] << ' ' << (int)input[setsock - 2] << '\n';
+	// if (input[0] == buffer[setsock - 1])
+		// return (false);
+	// input = joinrecv(buffer);
+
+	Parse_Cmd(input, getPassword(), fds[i].fd);
 	return (true);
 }
 
@@ -159,9 +173,7 @@ void	server::start()
 	
 	int					current_size;
 	bool				compress_arr;
-	char				buffer[1024];
 
-	n_fds = 1;
 	current_size = 0;
 	End_server = false;
 	compress_arr = false;
@@ -175,17 +187,18 @@ void	server::start()
 			if (fds[i].revents == 0)
 				continue ;
 			if (fds[i].fd == sock_fd) {
-				std::cout << "Listening Socker is readable\n" << std::endl;
+				// std::cout << "Listening Socker is readable\n" << std::endl;
+				// std::cout << "client ==> " << i + 1 << '\n';
 				n_fds = acceptSocket(n_fds);
 			}
 			else {
-				std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
+				// std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
 				st_conx = false;
-				do {
-					if (recvMessage(buffer, i) == false)
+				while (true) {
+					if (recvMessage(i) == false)
 						break ;
 					sendMessage();
-				} while (true);
+				}
 				if (st_conx) {
 					close(fds[i].fd);
 					fds[i].fd = -1;

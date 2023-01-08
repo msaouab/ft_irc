@@ -2,10 +2,13 @@
 #ifndef _SERVER_HPP__
 # define _SERVER_HPP__
 
-#include "./ircserv.hpp"
+# include "./ircserv.hpp"
+// # include "./Client.hpp"
 
 # define MAX_CLIENT 17
 # define TIMEOUT (10 * 60 * 1000)
+# define DEFAULT_BUFLEN 512
+class	Client;
 
 class server
 {
@@ -20,8 +23,9 @@ class server
 		int			n_fds;
 	public:
 		
-		struct sockaddr_in	address;
+		Client				*client;
 		socklen_t			addrLen;
+		struct sockaddr_in	address;
 		struct pollfd		fds[200];
 		server();
 		server(int _port, std::string _pswd);
@@ -37,7 +41,7 @@ class server
 		void		bindThesocket();
 		bool		WaitClient();
 		int			acceptSocket(int n_fds);
-		bool		recvMessage(char *buffer, int i);
+		bool		recvMessage(int i);
 		void		sendMessage();
 
 		class ErrorPortException : public std::exception
@@ -45,7 +49,9 @@ class server
 			const char *what() const throw();
 		};
 };
-		void		parse_command(std::string input, std::string password);
-		void 		password_check(std::string input, std::string password);
+
+void	Parse_Cmd(std::string input, std::string password, int client);
+void 	Check_Pass(std::string input, std::string password);
+void	Check_Nick(std::string input, int n);
 
 #endif /* _SERVER_HPP__ */

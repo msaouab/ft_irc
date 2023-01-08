@@ -16,8 +16,9 @@ RM = rm -f
 
 SRC =	./src/main.cpp\
 		./src/server.cpp\
+		./src/Client.cpp\
 		./src/utils.cpp\
-		./src/command_pars.cpp
+		./src/parse_cmd.cpp
 
 HEADERS = Includes/ircserv.hpp
 
@@ -26,12 +27,12 @@ OBJ = $(SRC:.cpp=.o)
 all : credit $(NAME)
 
 credit:
+	@echo "\n"
 	@echo "$(GREEN)\t╔════╗╔══╦══╗   ╔══╦══╗╔══╗  ╔════╗$(ED)"
 	@echo "$(GREEN)\t║        ║         ║   ║  ║  ║     $(ED)"
 	@echo "$(GREEN)\t╠════    ║         ║   ╠══╩═╗║     $(ED)"
 	@echo "$(GREEN)\t║        ║ ════ ╚══╩══╝║    ║╚════╝$(ED)"
-	@echo "$(GREEN)\t ┃$(ED)By: $(MAG)msaouab - iqessam - ygbouri$(GREEN)┃$(ED)"
-	@echo "$(GREEN)\t███████████████████████████████████\n\n$(ED)"
+	@echo "$(GREEN)\t┃ $(ED)By: $(MAG)msaouab - iqessam - ygbouri$(GREEN) ┃$(ED)\n"
 
 $(NAME): $(OBJ) $(HEADERS)
 		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)

@@ -4,9 +4,9 @@
 
 # define GRAY "\033[1;2m"
 # define RED "\033[1;31m"
-# define GREEN = "\033[1;32m"
-# define YELLOW = "\033[1;33m"
-# define BLUE = "\033[1;34m"
+# define GREEN "\033[1;32m"
+# define YELLOW "\033[1;33m"
+# define BLUE "\033[1;34m"
 # define ED "\033[0m"
 
 # include <iostream>
@@ -23,8 +23,10 @@
 # include <errno.h>
 # include <unistd.h>
 # include <fcntl.h>
+# include <map>
 
 # include "./server.hpp"
+# include "./Client.hpp"
 
 // struct sockaddr_in	address;
 
