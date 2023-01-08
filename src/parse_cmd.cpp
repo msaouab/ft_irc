@@ -24,11 +24,14 @@ void	Check_Nick(std::string input, int n)
 	input = input.substr(5, input.length());
 	std::pair<std::map<int, std::string>::iterator,bool> ret;
 	ret = myClient.insert(std::pair<int, std::string>(n, input));
-	std::cout << ret.first->first << ' ' << ret.first->second << '\n';
+	std::cout << ret.first->first << " ==> " << ret.first->second << '\n';
 	if (ret.second == true) {
-		std::cout << "element " << ret.first->second << " already existed";
+		std::cout << "element " << ret.first->first << " already existed";
 		std::cout << " with a value of " << ret.first->second << '\n';
 	}
+	std::map<int, std::string>::iterator it = myClient.begin();
+	for (it=myClient.begin(); it!=myClient.end(); ++it)
+    	std::cout << it->first << " => " << it->second << '\n';
 }
 
 void	Parse_Cmd(std::string input, std::string password, int client)

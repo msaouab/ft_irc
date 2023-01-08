@@ -7,18 +7,12 @@
 class Client
 {
 	private:
-		std::string	pass;
-		std::string	nick;
 		std::string	user;
 	public:
 		Client();
 		~Client();
 
-		void	setPass(std::string _pass);
-		void	setNick(std::string _nick);
 		void	setUser(std::string _user);
-		std::string	getPass() const ;
-		std::string	getNick() const ;
 		std::string	getUser() const ;
 
 };

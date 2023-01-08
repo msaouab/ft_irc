@@ -21,12 +21,14 @@ class server
 		bool		End_server;
 		bool		st_conx;
 		int			n_fds;
+		int			client;
 	public:
 		
-		Client				*client;
+		// Client				*client;
 		socklen_t			addrLen;
 		struct sockaddr_in	address;
-		struct pollfd		fds[200];
+		struct pollfd		fds[MAX_CLIENT];
+		std::map<std::string, int> myClient;
 		server();
 		server(int _port, std::string _pswd);
 		~server();
@@ -43,6 +45,10 @@ class server
 		int			acceptSocket(int n_fds);
 		bool		recvMessage(int i);
 		void		sendMessage();
+		void		Parse_cmd(std::string input);
+		void 		Check_pass(std::string pass, std::string password);
+		void		Check_nick(std::string nick);
+		void		Check_user(std::string user);
 
 		class ErrorPortException : public std::exception
 		{
@@ -50,8 +56,5 @@ class server
 		};
 };
 
-void	Parse_Cmd(std::string input, std::string password, int client);
-void 	Check_Pass(std::string input, std::string password);
-void	Check_Nick(std::string input, int n);
 
 #endif /* _SERVER_HPP__ */

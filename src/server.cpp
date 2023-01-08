@@ -118,10 +118,54 @@ int	server::acceptSocket(int n_fds)
 	return (n_fds);
 }
 
-// std::string	joinrecv(char *buffer)
+void	server::Check_pass(std::string pass, std::string password)
+{
+	if(pass.compare(5, password.length(), password))
+    {
+        std::cout << RED << "\nWRONG PASSWORD!!!\n" << ED << std::endl;
+		return ;
+    }
+    else
+    {
+        std::cout << GREEN << "\nWELCOME TO OUR_IRC SERVER\n" << ED << std::endl;
+		// WelcomeMSG();
+        return;
+    }
+}
+
+void	server::Check_nick(std::string nick)
+{
+	std::pair<std::map<std::string, int>::iterator,bool> ret;
+
+	nick = nick.substr(5, nick.length());
+	ret = myClient.insert(std::pair<std::string, int>(nick, client));
+	if (!ret.second)
+		std::cout << "Your Nickname not Insterted please try again" << std::endl;
+	// std::map<std::string, int>::iterator it = myClient.begin();
+	// std::cout << nick << ' ' << client << '\n';
+	// for (it=myClient.begin(); it!=myClient.end(); it++) {
+	// 	std::cout << it->first << " => " << it->second << '\n';
+	// }
+}
+
+// void	server::Check_user(std::string user)
 // {
+// 	nick = nick.substr(5, nick.length());
 
 // }
+
+void	server::Parse_cmd(std::string input)
+{
+	if (!input.compare(0, 4, "PASS"))
+		Check_pass(input, password);
+	else if (!(input.compare(0, 4, "NICK")))
+		Check_nick(input);
+	// else if (!(input.compare(0, 4, "USER")))
+	// 	Check_user(std::string input);
+	else
+		std::cout << RED << "\nCommand not found\n" << ED << std::endl;
+}
+
 
 bool	server::recvMessage(int i)
 {
@@ -137,21 +181,14 @@ bool	server::recvMessage(int i)
 		return (false);
 	}
 	if (setsock == 0) {
-		std::cout << "Connection closed\n" << std::endl;;
+		std::cout << "Connection closed\n" << std::endl;
 		st_conx = true;
 		return (false);
 	}
 	buffer[setsock] = '\0';
-	// std::cout << "buffer here ==>" << buffer;
-	// std::cout << "\nlast buffer here ==>" << (int)buffer[setsock - 1] << ' ' << (int)buffer[setsock - 2] << '\n';
 	input = strtok(buffer, "\r\n");
-	// std::cout << "input here ==>" << input;
-	// std::cout << "\nlast input here ==>" << (int)input[setsock - 1] << ' ' << (int)input[setsock - 2] << '\n';
-	// if (input[0] == buffer[setsock - 1])
-		// return (false);
-	// input = joinrecv(buffer);
-
-	Parse_Cmd(input, getPassword(), fds[i].fd);
+	client = fds[i].fd - 3;
+	Parse_cmd(input);
 	return (true);
 }
 
