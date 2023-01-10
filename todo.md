@@ -1,7 +1,7 @@
 
 1. Connection Registration
      - [] Pass message;
-     - [] Nick message;
+     - [x] Nick message;
      - [] User message;
 2. [] Parsing With White Spaces  `\r\n`;
 3. [] Channel operations
