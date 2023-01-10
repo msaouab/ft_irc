@@ -18,7 +18,6 @@ SRC =	./src/main.cpp\
 		./src/server.cpp\
 		./src/Client.cpp\
 		./src/utils.cpp\
-		./src/parse_cmd.cpp
 
 HEADERS = Includes/ircserv.hpp
 

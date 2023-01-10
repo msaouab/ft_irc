@@ -1,6 +1,8 @@
 
 #include "../Includes/server.hpp"
 
+size_t retry = 0;
+
 server::server() {
 }
 
@@ -8,6 +10,7 @@ server::server(int _port, std::string _pswd) {
 	this->port = _port;
 	this->password = _pswd;
 	this->n_fds = 1;
+	this->logged = false;
 }
 
 server::~server() {
@@ -120,16 +123,32 @@ int	server::acceptSocket(int n_fds)
 
 void	server::Check_pass(std::string pass, std::string password)
 {
-	if(pass.compare(5, password.length(), password))
+	if((pass.length() < 6 || pass.compare(5, password.length(), password)) && !logged)
     {
         std::cout << RED << "\nWRONG PASSWORD!!!\n" << ED << std::endl;
-		return ;
+			retry++;
+        std::cout << RED << retry << ED << std::endl;
+		if(retry > 2)
+		{
+			std::cout << RED << "\nYOU HAVE PASSED 3 TRIES , BYE!!!\n" << ED << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		else 
+			return;
     }
     else
     {
-        std::cout << GREEN << "\nWELCOME TO OUR_IRC SERVER\n" << ED << std::endl;
-		// WelcomeMSG();
-        return;
+		if (logged == true)
+		{	
+			std::cout << RED << "\nWARNING! YOU ARE ALREADY LOGGED IN!!\n" << ED << std::endl;
+			return;
+		}
+		else
+		{
+			std::cout << GREEN << "\nWELCOME TO OUR_IRC SERVER\n" << ED << std::endl;
+			logged = true;
+        	return;
+		}
     }
 }
 
