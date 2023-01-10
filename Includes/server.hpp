@@ -22,6 +22,7 @@ class server
 		bool		st_conx;
 		int			n_fds;
 		int			client;
+		bool 		logged;
 	public:
 		
 		// Client				*client;
