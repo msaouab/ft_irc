@@ -22,22 +22,24 @@ class server
 		bool		End_server;
 		bool		st_conx;
 		int			n_fds;
-		int			client;
+		int			i;
 		std::string nick;
 	public:
-		Client				*client;
 		socklen_t			addrLen;
 		struct sockaddr_in	address;
 		struct pollfd		fds[MAX_CLIENT];
-		// std::map<std::string, std::string> myClient;
-		std::map<int, Client*> myClient;
+		// Client				client;
+		std::map<std::string, Client> myGuest;
+		std::map<std::string, Client> myClient;
 		server();
 		server(int _port, std::string _pswd);
 		~server();
 
 		int			getPort() const;
 		std::string	getPassword() const;
+		std::string		getNick() const ;
 		void		setPort(int port);
+		void		setNick(std::string _nick);
 		void		setPassword(std::string password);
 
 		void		start();
@@ -49,8 +51,8 @@ class server
 		void		sendMessage();
 		void		Parse_cmd(std::string input);
 		void 		Check_pass(std::string pass, std::string password);
-		std::string	Check_nick(std::string nick);
-		void		Check_user(std::string user, std::string nick);
+		void		Check_nick(std::string nick);
+		void		Check_user(std::string user);
 
 		class ErrorPortException : public std::exception
 		{
@@ -58,5 +60,6 @@ class server
 		};
 };
 
+char	**ft_split(char const *s, char c);
 
 #endif /* _SERVER_HPP__ */

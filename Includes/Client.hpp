@@ -7,21 +7,27 @@
 class Client
 {
 	private:
-		std::string	pass;
 		std::string	nick;
 		std::string	user;
+		int			Clientfd;
 	public:
 		Client();
-		Client(std::string pass, std::string nick, std::string user);
+		Client &operator=(const Client &rhs);
+		// bool operator<(const Client &rhs) const {
+			// return it < rhs.it;
+		// }
+		Client( int fd );
 		~Client();
 
-		void	setPass(std::string _pass);
+		void	setClientfd(int _clientfd);
 		void	setNick(std::string _nick);
-		void	setUser(std::string _user);
-		std::string	getPass(void) const ;
+		void	setUser(std::string	_user);
+		int		getClientfd(void) const ;
 		std::string	getNick(void) const ;
 		std::string	getUser(void) const ;
 
 };
+
+std::ostream& operator<< (std::ostream& os, const Client& client);
 
 #endif /* _CLIENT_HPP__ */

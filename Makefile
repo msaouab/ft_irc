@@ -10,15 +10,18 @@ BLUE = \033[1;34m
 ED = \033[0m
 LINE_CLEAR = \x1b[1A\x1b[M
 
-CC = c++ -std=c++98
+CC = c++ -std=c++98 -Wall -Wextra -Werror
+
 CFLAGS = -Wall -Wextra -Werror
+
 RM = rm -f
 
 SRC =	./src/main.cpp\
 		./src/server.cpp\
 		./src/Client.cpp\
 		./src/utils.cpp\
-		./src/parse_cmd.cpp
+		./src/ft_split.cpp
+		# ./src/parse_cmd.cpp
 
 HEADERS = Includes/ircserv.hpp
 
