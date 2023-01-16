@@ -192,8 +192,7 @@ void	server::Check_nick(std::string nick, int i)
 		send(fds[i].fd, message.c_str(), message.length(), 0);
 		return ;
 	}
-	else
-	{	
+	else {
 		setNick(nick);
 		g_j++;
 	}
