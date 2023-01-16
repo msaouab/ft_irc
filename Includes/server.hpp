@@ -22,13 +22,12 @@ class server
 		bool		End_server;
 		bool		st_conx;
 		int			n_fds;
-		// int			i;
+		int			i;
 		std::string nick;
 	public:
 		socklen_t			addrLen;
 		struct sockaddr_in	address;
 		struct pollfd		fds[MAX_CLIENT];
-		// Client				client;
 		std::map<std::string, Client> myGuest;
 		std::map<std::string, Client> myClient;
 		server();
