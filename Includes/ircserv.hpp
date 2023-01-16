@@ -8,6 +8,8 @@
 # define YELLOW "\033[1;33m"
 # define BLUE "\033[1;34m"
 # define ED "\033[0m"
+# define BOLD "\x1b[1m"
+# define ED_B "\x1b[0m"
 
 # include <iostream>
 # include <stdlib.h>

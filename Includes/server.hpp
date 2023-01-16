@@ -8,6 +8,7 @@
 # define MAX_CLIENT 17
 # define TIMEOUT (10 * 60 * 1000)
 # define DEFAULT_BUFLEN 512
+
 class	Client;
 
 class server
@@ -21,22 +22,24 @@ class server
 		bool		End_server;
 		bool		st_conx;
 		int			n_fds;
-		int			client;
-		bool 		logged;
+		int			i;
+		std::string nick;
 	public:
-		
-		// Client				*client;
 		socklen_t			addrLen;
 		struct sockaddr_in	address;
 		struct pollfd		fds[MAX_CLIENT];
-		std::map<std::string, int> myClient;
+		// Client				client;
+		std::map<std::string, Client> myGuest;
+		std::map<std::string, Client> myClient;
 		server();
 		server(int _port, std::string _pswd);
 		~server();
 
 		int			getPort() const;
 		std::string	getPassword() const;
+		std::string		getNick() const ;
 		void		setPort(int port);
+		void		setNick(std::string _nick);
 		void		setPassword(std::string password);
 
 		void		start();
@@ -57,5 +60,6 @@ class server
 		};
 };
 
+char	**ft_split(char const *s, char c);
 
 #endif /* _SERVER_HPP__ */
