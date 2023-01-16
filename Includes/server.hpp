@@ -22,7 +22,7 @@ class server
 		bool		End_server;
 		bool		st_conx;
 		int			n_fds;
-		int			i;
+		// int			i;
 		std::string nick;
 	public:
 		socklen_t			addrLen;
@@ -49,10 +49,12 @@ class server
 		int			acceptSocket(int n_fds);
 		bool		recvMessage(int i);
 		void		sendMessage();
-		void		Parse_cmd(std::string input);
-		void 		Check_pass(std::string pass, std::string password);
-		void		Check_nick(std::string nick);
-		void		Check_user(std::string user);
+		void		Parse_cmd(std::string input, int i);
+		void 		Check_pass(std::string pass, std::string password, int fd);
+		void		Check_nick(std::string nick, int i);
+		void		Check_user(std::string user, int i);
+		void		Check_quit(std::string user, int i);
+		std::string	_welcomemsg(void);
 
 		class ErrorPortException : public std::exception
 		{

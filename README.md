@@ -62,3 +62,4 @@
 	- https://www.ibm.com/docs/en/i/7.4?topic=ssw_ibm_i_74/apis/accept.htm
 	- https://pubs.opengroup.org/onlinepubs/000095399/functions/setsockopt.html
 	- https://ircv3.net/irc/
+	- [irc cheat sheet](https://gist.github.com/xero/2d6e4b061b4ecbeb9f99)

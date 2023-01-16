@@ -1,6 +1,39 @@
 
 #include "../Includes/server.hpp"
 
+std::string	server::_welcomemsg(void)
+{
+	struct timeval tv;
+	time_t	time;
+	struct tm *info;
+	char buffer[64];
+	gettimeofday(&tv, NULL);
+	time = tv.tv_sec;
+	info = localtime(&time);
+	std::string welcome = GREEN;
+	welcome.append("\n\n");
+	welcome.append("\t██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗\n");
+	welcome.append("\t██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝\n");
+	welcome.append("\t██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗\n");
+	welcome.append("\t██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝\n");
+	welcome.append("\t╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗\n");
+	welcome.append("\t ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝\n\n");
+	welcome.append(ED);
+	welcome.append(GRAY);
+	welcome.append(asctime(info));
+	strftime (buffer, sizeof buffer, "Today is %A, %B %d.\n", info);
+	welcome.append(ED);
+	welcome.append(BLUE);
+	welcome.append("You need to login so you can start chatting OR you can send HELP to see how :) \n");
+	welcome.append("To connect with our server please enter: \n");
+	welcome.append("Command: `PASS ` password server\n");
+	welcome.append("Command: `NICK ` Your nickname in server please shoose one not unique\n");
+	welcome.append("Command: `USER ` Your username in the server \n");
+	welcome.append(ED);
+	return (welcome);
+}
+
+int g_j = 1;
 server::server() {
 }
 
@@ -106,6 +139,7 @@ bool	server::WaitClient()
 int	server::acceptSocket(int n_fds)
 {
 	int	new_sd;
+	std::string welcome = _welcomemsg();
 
 	new_sd = -1;
 	while (new_sd == -1) {
@@ -118,60 +152,94 @@ int	server::acceptSocket(int n_fds)
 			break ;
 		}
 		std::cout << "New incomming connection ==> " << new_sd << std::endl;
+		if (send(new_sd, welcome.c_str(), welcome.length(), 0) <= 0)
+			std::cout << strerror(errno);
 		fds[n_fds].fd = new_sd;
 		fds[n_fds].events = POLLIN;
 		n_fds++;
 	}
-	std::cout << GREEN << "\n\t\tWELCOME TO OUR_IRC SERVER" << ED << std::endl << std::endl;
-	std::cout << GRAY << "To connect with our server please enter: " << std::endl;
-	std::cout << "Command: `PASS ` password server" << std::endl;
-	std::cout << "Command: `NICK ` Your nickname in server please shoose one not unique" << std::endl;
-	std::cout << "Command: `USER ` Your username in the server " << ED << std::endl;
+	// std::cout << GREEN << "\n\t\tWELCOME TO OUR_IRC SERVER" << ED << std::endl << std::endl;
+	time_t	t = time(0);
+	struct tm * now = localtime( & t );
+	// welcome.append(now->tm_hour, now->tm_mon);
+	std::cout << now->tm_hour << ":" << now->tm_min << std::endl;
 	return (n_fds);
 }
 
-void	server::Check_pass(std::string pass, std::string password)
+void	server::Check_pass(std::string pass, std::string password, int fd)
 {
+	std::string message = RED;
+	message.append("Incorrect Password\n");
+	message.append(ED);
 	if(pass.compare(5, password.length(), password))
     {
-        std::cout << RED << "\nWRONG PASSWORD!!!\n" << ED << std::endl;
+		send(fd, message.c_str(), message.length(), 0);
 		return ;
     }
+	else
+		g_j++;
 }
 
-void	server::Check_nick(std::string nick)
+void	server::Check_nick(std::string nick, int i)
 {
+	std::string	message = RED;
+	message.append("this nickname already exist\n");
+	message.append(ED);
 	nick = nick.substr(5, nick.length());
 	std::pair<std::map<std::string, Client>::iterator,bool> ret;
-	ret = myGuest.insert(std::pair<std::string, Client>(nick, Client(i)));
-	std::cout << "this fdsocket ==> " << fds[i].fd << " i ==> " << i << std::endl;
-	if (ret.second == false)
-		std::cout << "this nickname already exist" << std::endl;
+	ret = myGuest.insert(std::pair<std::string, Client>(nick, Client(fds[i].fd)));
+	if (ret.second == false) {
+		send(fds[i].fd, message.c_str(), message.length(), 0);
+		return ;
+	}
 	else
+	{	
 		setNick(nick);
+		g_j++;
+	}
 }
 
-void	server::Check_user(std::string user)
+void	server::Check_user(std::string user, int i)
 {
 	// char	**userArr;
 	user = user.substr(5, user.length());
 	// userArr = ft_split(user.c_str(), ' ');
-	myGuest[nick].setUser(user);
 	std::map<std::string, Client>::iterator it = myGuest.begin();
+	for (it=myGuest.begin(); it!=myGuest.end(); ++it)
+	{
+		if (it->second.getClientfd() == fds[i].fd)
+		{
+			myGuest[it->first].setUser(user);
+			g_j++;
+			std::cout << it->first << " ===>>> " << it->second.getClientfd() << '\n';
+		}
+	}
+	std::cout << "this fdsocket ==> " << fds[i].fd << " i ==> " << i << std::endl;
 	for (it=myGuest.begin(); it!=myGuest.end(); ++it)
 		std::cout << it->first << " => " << it->second.getUser() << '\n';
 }
 
-void	server::Parse_cmd(std::string input)
+void	server::Check_quit(std::string cmd, int i)
 {
+	close(fds[i].fd);
+}
+
+void	server::Parse_cmd(std::string input, int i)
+{
+	std::string	message = RED;
+	message.append("Command not found\n");
+	message.append(ED);
 	if (!input.compare(0, 4, "PASS"))
-		Check_pass(input, password);
+		Check_pass(input, password, fds[i].fd);
 	else if (!(input.compare(0, 4, "NICK")))
-		Check_nick(input);
+		Check_nick(input, i);
 	else if (!(input.compare(0, 4, "USER")))
-		Check_user(input);
+		Check_user(input, i);
+	else if (!(input.compare(0, 4, "QUIT")))
+		Check_quit(input, i);
 	else
-		std::cout << RED << "\nCommand not found\n" << ED << std::endl;
+		if (send(fds[i].fd, message.c_str(), message.length(), 0) >= 0)
+			perror(strerror(errno));
 }
 
 bool	server::recvMessage(int i)
@@ -194,10 +262,7 @@ bool	server::recvMessage(int i)
 	}
 	buffer[setsock] = '\0';
 	input = strtok(buffer, "\r\n");
-	// if (input[0] == buffer[setsock - 1])
-	// 	return (false);
-	// cid = fds[i].fd;
-	Parse_cmd(input);
+	Parse_cmd(input, i);
 	return (true);
 }
 
@@ -218,6 +283,7 @@ void	server::start()
 {
 	int					current_size;
 	bool				compress_arr;
+	int					i;
 
 	current_size = 0;
 	End_server = false;

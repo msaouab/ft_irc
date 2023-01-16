@@ -26,12 +26,14 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <map>
+# include <ctime>
+# include <chrono>
 
 # include "./server.hpp"
 # include "./Client.hpp"
 
 // struct sockaddr_in	address;
 
-bool	isNumber(std::string str);
+bool		isNumber(std::string str);
 
 #endif /* _IRC_SERV_HPP__ */

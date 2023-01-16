@@ -10,8 +10,10 @@ BLUE = \033[1;34m
 ED = \033[0m
 LINE_CLEAR = \x1b[1A\x1b[M
 
-CC = c++ -std=c++98 -Wall -Wextra -Werror
+CC = c++ -std=c++98
+
 CFLAGS = -Wall -Wextra -Werror
+
 RM = rm -f
 
 SRC =	./src/main.cpp\
@@ -35,7 +37,7 @@ credit:
 	@echo "$(GREEN)\t┃ $(ED)By: $(MAG)msaouab - iqessam - ygbouri$(GREEN) ┃$(ED)\n"
 
 $(NAME): $(OBJ) $(HEADERS)
-		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+		$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)"
 
 clean: 
