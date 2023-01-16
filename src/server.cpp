@@ -14,8 +14,8 @@ std::string	server::_welcomemsg(void)
 	welcome.append("\n\n");
 	welcome.append("\t██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗\n");
 	welcome.append("\t██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝\n");
-	welcome.append("\t██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗\n");
-	welcome.append("\t██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝\n");
+	welcome.append("\t██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗  \n");
+	welcome.append("\t██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝  \n");
 	welcome.append("\t╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗\n");
 	welcome.append("\t ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝\n\n");
 	welcome.append(ED);
@@ -33,7 +33,6 @@ std::string	server::_welcomemsg(void)
 	return (welcome);
 }
 
-int g_j = 1;
 server::server() {
 }
 
@@ -123,7 +122,7 @@ void	server::bindThesocket()
 
 bool	server::WaitClient()
 {
-	std::cout << "Waiting on poll()...\n" << std::endl;
+	// std::cout << "Waiting on poll()...\n" << std::endl;
 	setsock = poll(fds, n_fds, TIMEOUT);
 	if (setsock < 0) {
 		std::cout << "poll() failed: " << strerror(errno) << '\n';
@@ -157,12 +156,8 @@ int	server::acceptSocket(int n_fds)
 		fds[n_fds].fd = new_sd;
 		fds[n_fds].events = POLLIN;
 		n_fds++;
+		std::cout << "nfds ==> " << n_fds << std::endl;
 	}
-	// std::cout << GREEN << "\n\t\tWELCOME TO OUR_IRC SERVER" << ED << std::endl << std::endl;
-	time_t	t = time(0);
-	struct tm * now = localtime( & t );
-	// welcome.append(now->tm_hour, now->tm_mon);
-	std::cout << now->tm_hour << ":" << now->tm_min << std::endl;
 	return (n_fds);
 }
 
@@ -176,8 +171,6 @@ void	server::Check_pass(std::string pass, std::string password, int fd)
 		send(fd, message.c_str(), message.length(), 0);
 		return ;
     }
-	else
-		g_j++;
 }
 
 void	server::Check_nick(std::string nick, int i)
@@ -194,7 +187,6 @@ void	server::Check_nick(std::string nick, int i)
 	}
 	else {
 		setNick(nick);
-		g_j++;
 	}
 }
 
@@ -209,7 +201,6 @@ void	server::Check_user(std::string user, int i)
 		if (it->second.getClientfd() == fds[i].fd)
 		{
 			myGuest[it->first].setUser(user);
-			g_j++;
 			std::cout << it->first << " ===>>> " << it->second.getClientfd() << '\n';
 		}
 	}
@@ -220,7 +211,18 @@ void	server::Check_user(std::string user, int i)
 
 void	server::Check_quit(std::string cmd, int i)
 {
+	std::string	message;
+	message = RED;
+	message.append("You are leaving the server.\n");
+	message.append("see you later :)");
+	message.append(ED);
+	send(fds[i].fd, message.c_str(), message.length(), 0);
 	close(fds[i].fd);
+	while (i < n_fds) {
+		fds[i].fd = fds[i + 1].fd;
+		i++;
+	}
+	n_fds--;
 }
 
 void	server::Parse_cmd(std::string input, int i)
@@ -246,8 +248,10 @@ bool	server::recvMessage(int i)
 	char		buffer[DEFAULT_BUFLEN];
 	std::string	input;
 
+	std::cout << fds[i].fd << ": fd" << std::endl;
 	setsock = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
 	if (setsock < 0) {
+		std::cout << setsock << " Quit msg \n";
 		if (errno != EWOULDBLOCK) {
 			std::cout << "recv() failed " << strerror(errno) << '\n' << std::endl;
 			st_conx = true;
@@ -260,23 +264,13 @@ bool	server::recvMessage(int i)
 		return (false);
 	}
 	buffer[setsock] = '\0';
-	input = strtok(buffer, "\r\n");
+	std::cout << "test this " << setsock << std::endl;
+	if (setsock != 1) {
+		input = strtok(buffer, "\r\n");
+	}
 	Parse_cmd(input, i);
 	return (true);
 }
-
-// void	server::sendMessage()
-// {
-// 	int	len;
-
-// 	len = setsock;
-// 	// setsock = send(fds[i].fd, buffer, len, 0);
-// 	// if (setsock < 0) {
-// 	// 	std::cout << "send() failed\n" << std::endl;
-// 	// 	st_conx = true;
-// 	// 	break ;
-// 	// }
-// }
 
 void	server::start()
 {
@@ -304,11 +298,12 @@ void	server::start()
 			else {
 				// std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
 				st_conx = false;
-				while (true) {
-					if (recvMessage(i) == false)
-						break ;
-					// sendMessage();
-				}
+				recvMessage(i);
+				// while (true) {
+				// 	if (recvMessage(i) == false)
+				// 		break ;
+				// 	// sendMessage();
+				// }
 				if (st_conx) {
 					close(fds[i].fd);
 					fds[i].fd = -1;
