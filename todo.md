@@ -2,8 +2,7 @@
 1. Connection Registration
      - [x] Pass message;
      - [x] Nick message;
-     - [x] User message;
-	 - [] order CMD Registration.
+     - [] User message;
 2. [x] Parsing With White Spaces  `\r\n`;
 3. [] Channel operations
 4. [] Server queries and commands

@@ -18,6 +18,7 @@ void	Client::setClientfd(int _clientfd) {
 void	Client::setNick(std::string _nick) {
 	this->nick = _nick;
 }
+
 void	Client::setUser(std::string	_user) {
 	this->user = _user;
 }

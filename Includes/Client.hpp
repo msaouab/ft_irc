@@ -30,3 +30,4 @@ class Client
 std::ostream& operator<< (std::ostream& os, const Client& client);
 
 #endif /* _CLIENT_HPP__ */
+
