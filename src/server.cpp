@@ -144,7 +144,7 @@ void	server::Check_nick(std::string nick, int i)
 {
 	std::string	message;
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
-	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
+	// std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, message, RED);
 		return ;
@@ -155,7 +155,7 @@ void	server::Check_nick(std::string nick, int i)
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
 		if (it->second.getNick() == nick) {
 			sendError(fds[i].fd, message, RED);
-			myGuest[fds[i].fd].setAuth(false);
+			// myGuest[fds[i].fd].setAuth(false);
 			return ;
 		}
 	}
