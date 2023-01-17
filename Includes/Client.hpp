@@ -7,23 +7,22 @@ class Client
 {
 	private:
 		std::string	nick;
-		std::string	user;
+		char		**user;
 		int			Clientfd;
+		bool		Auth;
 	public:
 		Client();
 		Client &operator=(const Client &rhs);
-		// bool operator<(const Client &rhs) const {
-			// return it < rhs.it;
-		// }
-		Client( int fd );
 		~Client();
 
 		void	setClientfd(int _clientfd);
 		void	setNick(std::string _nick);
-		void	setUser(std::string	_user);
-		int		getClientfd(void) const ;
+		void	setUser(char **_user);
+		void	setAuth(bool _Auth);
+		int			getClientfd(void) const ;
 		std::string	getNick(void) const ;
-		std::string	getUser(void) const ;
+		char	**getUser(void) const ;
+		bool		getAuth() const ;
 
 };
 

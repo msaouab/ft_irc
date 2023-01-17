@@ -32,3 +32,12 @@ std::string	server::_welcomemsg(void)
 	welcome.append(ED);
 	return (welcome);
 }
+
+void	server::sendError(int fd, std::string msg, std::string color)
+{
+	std::string	message;
+	message = color;
+	message.append(msg);
+	message.append(ED);
+	send(fd, message.c_str(), message.length(), 0);
+}

@@ -10,9 +10,9 @@ BLUE = \033[1;34m
 ED = \033[0m
 LINE_CLEAR = \x1b[1A\x1b[M
 
-CC = c++ -std=c++98
+CC = c++ 
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -std=c++98
 
 RM = rm -f
 
@@ -40,6 +40,9 @@ credit:
 $(NAME): $(OBJ) $(HEADERS)
 		$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)"
+
+%.o:%.cpp $(HEADERS)
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean: 
 		@$(RM) $(OBJ)

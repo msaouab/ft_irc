@@ -16,7 +16,7 @@ class server
 	private:
 		int			port;
 		int			sock_fd;
-		int			setsock;
+		int			rc;
 		int			timeout;
 		std::string	password;
 		bool		End_server;
@@ -28,8 +28,8 @@ class server
 		socklen_t			addrLen;
 		struct sockaddr_in	address;
 		struct pollfd		fds[MAX_CLIENT];
-		std::map<std::string, Client> myGuest;
-		std::map<std::string, Client> myClient;
+		std::map<int, Client > myGuest;
+		std::map<int, Client> myClient;
 		server();
 		server(int _port, std::string _pswd);
 		~server();
@@ -47,13 +47,14 @@ class server
 		bool		WaitClient();
 		int			acceptSocket(int n_fds);
 		bool		recvMessage(int i);
-		void		sendMessage();
+		// void		sendMessage();
 		void		Parse_cmd(std::string input, int i);
-		void 		Check_pass(std::string pass, std::string password, int fd);
+		void 		Check_pass(std::string pass, std::string password, int i);
 		void		Check_nick(std::string nick, int i);
 		void		Check_user(std::string user, int i);
-		void		Check_quit(std::string user, int i);
+		void		Check_quit(int i);
 		std::string	_welcomemsg(void);
+		void		sendError(int fd, std::string msg, std::string color);
 
 		class ErrorPortException : public std::exception
 		{

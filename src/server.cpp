@@ -50,14 +50,14 @@ void	server::CreateSocket()
 		std::cout << "Socket() failed: " << strerror(errno) << '\n';
 		exit(EXIT_FAILURE);
 	}
-	setsock = setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt));
-	if (setsock < 0) {
+	rc = setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt));
+	if (rc < 0) {
 		std::cout << "setsockopt() failed: " << strerror(errno) << '\n';
 		close(sock_fd);
 		exit(EXIT_FAILURE);
 	}
-	setsock = fcntl(sock_fd, F_SETFL, O_NONBLOCK);
-	if (setsock < 0) {
+	rc = fcntl(sock_fd, F_SETFL, O_NONBLOCK);
+	if (rc < 0) {
 		std::cout << "fcntl() failed: " << strerror(errno) << '\n';
 		close(sock_fd);
 		exit(EXIT_FAILURE);
@@ -69,14 +69,14 @@ void	server::bindThesocket()
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons(port);
-	setsock = bind(sock_fd, (struct sockaddr *)&address, sizeof(address));
-	if (setsock < 0) {
+	rc = bind(sock_fd, (struct sockaddr *)&address, sizeof(address));
+	if (rc < 0) {
 		std::cout << "bind() failed: " << strerror(errno) << '\n';
 		close(sock_fd);
 		exit(EXIT_FAILURE);
 	}
-	setsock = listen(sock_fd, 3);
-	if (setsock < 0) {
+	rc = listen(sock_fd, 3);
+	if (rc < 0) {
 		std::cout << "listen() failed: " << strerror(errno) << '\n';
 		close(sock_fd);
 		exit(EXIT_FAILURE);
@@ -90,13 +90,12 @@ void	server::bindThesocket()
 
 bool	server::WaitClient()
 {
-	// std::cout << "Waiting on poll()...\n" << std::endl;
-	setsock = poll(fds, n_fds, TIMEOUT);
-	if (setsock < 0) {
+	rc = poll(fds, n_fds, TIMEOUT);
+	if (rc < 0) {
 		std::cout << "poll() failed: " << strerror(errno) << '\n';
 		return (false) ;
 	}
-	if (setsock == 0) {
+	if (rc == 0) {
 		std::cout << GRAY << "poll() timeout. End Program.\n" << ED << std::endl;
 		return (false) ;
 	}
@@ -128,84 +127,92 @@ int	server::acceptSocket(int n_fds)
 	return (n_fds);
 }
 
-void	server::Check_pass(std::string pass, std::string password, int fd)
+void	server::Check_pass(std::string pass, std::string password, int i)
 {
-	std::string message = RED;
-	message.append("Incorrect Password\n");
-	message.append(ED);
+	std::string message;
+	message = "Incorrect Password\n";
 	if(pass.compare(5, password.length(), password)) {
-		send(fd, message.c_str(), message.length(), 0);
+		myGuest[fds[i].fd].setAuth(false);
+		sendError(fds[i].fd, message, RED);
 		return ;
     }
+	myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
+	myGuest[fds[i].fd].setAuth(true);
 }
 
 void	server::Check_nick(std::string nick, int i)
 {
-	std::string	message = RED;
-	message.append("this nickname already exist\n");
-	message.append(ED);
-	nick = nick.substr(5, nick.length());
-	std::pair<std::map<std::string, Client>::iterator,bool> ret;
-	ret = myGuest.insert(std::pair<std::string, Client>(nick, Client(fds[i].fd)));
-	if (ret.second == false) {
-		send(fds[i].fd, message.c_str(), message.length(), 0);
+	std::string	message;
+	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
+	if (!myGuest[fds[i].fd].getAuth()) {
+		sendError(fds[i].fd, message, RED);
 		return ;
 	}
-	else {
-		setNick(nick);
+	message = "this nickname already exist\n";
+	nick = nick.substr(5, nick.length());
+	std::map<int, Client>::iterator it;
+	for (it = myGuest.begin(); it != myGuest.end(); it++) {
+		if (it->second.getNick() == nick) {
+			sendError(fds[i].fd, message, RED);
+			myGuest[fds[i].fd].setAuth(false);
+			return ;
+		}
 	}
+	myGuest[fds[i].fd].setNick(nick);
+	// std::cout << myGuest[fds[i].fd].getClientfd() << " ==> " << myGuest[fds[i].fd].getNick() << std::endl;
+	myGuest[fds[i].fd].setAuth(true);
 }
 
 void	server::Check_user(std::string user, int i)
 {
-	// char	**userArr;
-	user = user.substr(5, user.length());
-	// userArr = ft_split(user.c_str(), ' ');
-	std::map<std::string, Client>::iterator it = myGuest.begin();
-	for (it=myGuest.begin(); it!=myGuest.end(); ++it)
-	{
-		if (it->second.getClientfd() == fds[i].fd)
-		{
-			myGuest[it->first].setUser(user);
-			std::cout << it->first << " ===>>> " << it->second.getClientfd() << '\n';
-		}
+	std::string	message;
+	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
+	if (!myGuest[fds[i].fd].getAuth()) {
+		sendError(fds[i].fd, message, RED);
+		return ;
 	}
-	std::cout << "this fdsocket ==> " << fds[i].fd << " i ==> " << i << std::endl;
+	char	**userArr;
+	user = user.substr(5, user.length());
+	userArr = ft_split(user.c_str(), ' ');
+	if (lenArr(userArr) != 4) {
+		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n";
+		sendError(fds[i].fd, message, RED);
+		return ;
+	}
+	myGuest[fds[i].fd].setUser(userArr);
 }
 
-void	server::Check_quit(std::string cmd, int i)
+void	server::Check_quit(int i)
 {
 	std::string	message;
-	message = RED;
-	message.append("You are leaving the server.\nsee you later :)");
-	message.append(ED);
-	send(fds[i].fd, message.c_str(), message.length(), 0);
-	close(fds[i].fd);
-	while (i < n_fds) {
-		fds[i].fd = fds[i + 1].fd;
-		i++;
+	message = "You are leaving the server.\nsee you later :)";
+	sendError(fds[i].fd, message, GREEN);
+	myGuest.erase(fds[i].fd);
+	std::map<int, Client>::iterator it;
+	for (it = myGuest.begin(); it != myGuest.end(); it++) {
+		std::cout << it->second.getClientfd() << " ==> " << it->second.getNick() << std::endl;
 	}
-	n_fds--;
+	close(fds[i].fd);
 }
 
 void	server::Parse_cmd(std::string input, int i)
 {
-	std::string	message = RED;
-	message.append("Command not found\n");
-	message.append(ED);
+	std::string	message;
+	message = "Command not found\n";
 	if (!input.compare(0, 4, "PASS"))
-		Check_pass(input, password, fds[i].fd);
+		Check_pass(input, password, i);
 	else if (!(input.compare(0, 4, "NICK")))
 		Check_nick(input, i);
 	else if (!(input.compare(0, 4, "USER")))
 		Check_user(input, i);
-	else if (!(input.compare(0, 4, "USER")))
-		Check_user(input, i);
 	else if (!(input.compare(0, 4, "QUIT")))
-		Check_quit(input, i);
+		Check_quit(i);
 	else
-		if (send(fds[i].fd, message.c_str(), message.length(), 0) >= 0)
-			perror(strerror(errno));
+		sendError(fds[i].fd, message, RED);
+		// if (send(fds[i].fd, message.c_str(), message.length(), 0) >= 0)
+			// perror(strerror(errno));
 }
 
 bool	server::recvMessage(int i)
@@ -213,23 +220,22 @@ bool	server::recvMessage(int i)
 	char		buffer[DEFAULT_BUFLEN];
 	std::string	input;
 
-	setsock = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
-	if (setsock < 0) {
+	rc = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
+	if (rc < 0) {
 		if (errno != EWOULDBLOCK) {
 			std::cout << "recv() failed: " << strerror(errno) << std::endl;
 			st_conx = true;
 		}
 		return (false);
 	}
-	if (setsock == 0) {
-		std::cout << "Connection closed\n" << std::endl;
+	if (rc == 0) {
+		std::cout << "Connection closed" << std::endl;
 		st_conx = true;
 		return (false);
 	}
-	buffer[setsock] = '\0';
-	if (setsock != 1) {
+	buffer[rc] = '\0';
+	if (rc != 1)
 		input = strtok(buffer, "\r\n");
-	}
 	Parse_cmd(input, i);
 	return (true);
 }
@@ -240,6 +246,7 @@ void	server::start()
 	bool				compress_arr;
 	int					i;
 
+	n_fds = 1;
 	current_size = 0;
 	End_server = false;
 	compress_arr = false;
@@ -253,12 +260,11 @@ void	server::start()
 			if (fds[i].revents == 0)
 				continue ;
 			if (fds[i].fd == sock_fd) {
-				// std::cout << "Listening Socker is readable\n" << std::endl;
-				// std::cout << "client ==> " << i + 1 << '\n';
+				std::cout << "Listening Socker is readable\n" << std::endl;
 				n_fds = acceptSocket(n_fds);
 			}
 			else {
-				// std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
+				std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
 				st_conx = false;
 				recvMessage(i);
 				// while (true) {
@@ -269,7 +275,6 @@ void	server::start()
 				while (true) {
 					if (recvMessage(i) == false)
 						break ;
-					// sendMessage();
 				}
 				if (st_conx) {
 					close(fds[i].fd);
