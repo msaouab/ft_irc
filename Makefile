@@ -12,7 +12,7 @@ LINE_CLEAR = \x1b[1A\x1b[M
 
 CC = c++ 
 
-CFLAGS = -Wall -Wextra -Werror -g -std=c++98
+CFLAGS = -Wall -Wextra -Werror -std=c++98
 
 RM = rm -f
 

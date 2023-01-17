@@ -144,6 +144,7 @@ void	server::Check_nick(std::string nick, int i)
 {
 	std::string	message;
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, message, RED);
 		return ;
@@ -188,6 +189,11 @@ void	server::Check_quit(int i)
 	std::string	message;
 	message = "You are leaving the server.\nsee you later :)";
 	sendError(fds[i].fd, message, GREEN);
+	myGuest.erase(fds[i].fd);
+	std::map<int, Client>::iterator it;
+	for (it = myGuest.begin(); it != myGuest.end(); it++) {
+		std::cout << it->second.getClientfd() << " ==> " << it->second.getNick() << std::endl;
+	}
 	close(fds[i].fd);
 }
 
