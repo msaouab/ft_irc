@@ -35,5 +35,6 @@
 // struct sockaddr_in	address;
 
 bool		isNumber(std::string str);
+int			lenArr(char **arr);
 
 #endif /* _IRC_SERV_HPP__ */
