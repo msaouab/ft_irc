@@ -144,7 +144,6 @@ void	server::Check_nick(std::string nick, int i)
 {
 	std::string	message;
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
-	// std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, message, RED);
 		return ;
@@ -155,12 +154,10 @@ void	server::Check_nick(std::string nick, int i)
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
 		if (it->second.getNick() == nick) {
 			sendError(fds[i].fd, message, RED);
-			// myGuest[fds[i].fd].setAuth(false);
 			return ;
 		}
 	}
 	myGuest[fds[i].fd].setNick(nick);
-	// std::cout << myGuest[fds[i].fd].getClientfd() << " ==> " << myGuest[fds[i].fd].getNick() << std::endl;
 	myGuest[fds[i].fd].setAuth(true);
 }
 
@@ -211,8 +208,6 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_quit(i);
 	else
 		sendError(fds[i].fd, message, RED);
-		// if (send(fds[i].fd, message.c_str(), message.length(), 0) >= 0)
-			// perror(strerror(errno));
 }
 
 bool	server::recvMessage(int i)
