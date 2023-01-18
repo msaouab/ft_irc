@@ -159,6 +159,9 @@ void	server::Check_nick(std::string nick, int i)
 	}
 	myGuest[fds[i].fd].setNick(nick);
 	myGuest[fds[i].fd].setAuth(true);
+	if (myGuest[fds[i].fd].getLog())
+		myClient[fds[i].fd] = myGuest[fds[i].fd];
+
 }
 
 void	server::Check_user(std::string user, int i)
@@ -171,7 +174,7 @@ void	server::Check_user(std::string user, int i)
 		sendError(fds[i].fd, message, RED);
 		return ;
 	}
-	message = "Please enter your USER before USER :)\n";
+	message = "Please enter your NICK before USER :)\n";
 	if (myGuest[fds[i].fd].getNick() == "") {
 		sendError(fds[i].fd, message, RED);
 		return ;
@@ -186,7 +189,10 @@ void	server::Check_user(std::string user, int i)
 	}
 	myGuest[fds[i].fd].setUser(userArr);
 	if (myGuest[fds[i].fd].getAuth())
+	{
 		myClient[fds[i].fd] = myGuest[fds[i].fd];
+		myGuest[fds[i].fd].setLog(true);
+	}
 	ft_free(userArr);
 }
 
@@ -222,6 +228,27 @@ void 	server::Check_admin(int i)
 	return ;
 	
 }
+
+void 	server::Check_who(int i)
+{
+	std::string auterror;
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	if (!myGuest[fds[i].fd].getAuth()) {
+		sendError(fds[i].fd, auterror, RED);
+		return ;
+	}
+	std::string message;
+	std::map<int, Client>::iterator it = myClient.begin();
+	message = RED;
+	message.append("Your IRC server administrator's nickname is ");
+	message.append(it->second.getNick());
+	message.append("\n");
+	message.append(ED);
+	send(fds[i].fd, message.c_str(), message.length(), 0);
+	return ;
+	
+}
+
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
@@ -236,6 +263,8 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_quit(i);
 	else if (!(input.compare(0, 5, "ADMIN")))
 		Check_admin(i);
+	else if (!(input.compare(0, 3, "WHO")))
+		Check_who(i);
 	else
 		sendError(fds[i].fd, message, RED);
 }
@@ -244,7 +273,7 @@ bool	server::recvMessage(int i)
 {
 	char		buffer[DEFAULT_BUFLEN];
 	std::string	input;
-
+	
 	rc = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
 	if (rc < 0) {
 		if (errno != EWOULDBLOCK) {
@@ -292,6 +321,8 @@ void	server::start()
 			else {
 				std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
 				st_conx = false;
+				std::string redr = "> ";
+				sendError(fds[i].fd, redr, RED);
 				recvMessage(i);
 				// while (true) {
 				// 	if (recvMessage(i) == false)

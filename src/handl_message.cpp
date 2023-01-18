@@ -30,6 +30,9 @@ std::string	server::_welcomemsg(void)
 	welcome.append("Command: `NICK ` Your nickname in server please shoose one not unique\n");
 	welcome.append("Command: `USER ` Your username in the server \n");
 	welcome.append(ED);
+	welcome.append(RED);
+	welcome.append("> ");
+	welcome.append(ED);
 	return (welcome);
 }
 

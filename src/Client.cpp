@@ -3,6 +3,7 @@
 // Client::Client() : Clientfd(0), nick(0), user(0) { }
 Client::Client() {
 	this->Auth = false;
+	this->Log = false;
 	this->Clientfd = 0;
 	this->nick = "";
 	this->user = NULL;
@@ -26,6 +27,11 @@ void	Client::setNick(std::string _nick) {
 void	Client::setAuth(bool _Auth) {
 	this->Auth = _Auth;
 }
+
+void	Client::setLog(bool _Log) {
+	this->Log = _Log;
+}
+
 void	Client::setUser(char **_user) {
 	this->user = _user;
 }
@@ -41,6 +47,10 @@ char**	Client::getUser(void) const {
 }
 bool	Client::getAuth(void) const {
 	return (this->Auth);
+}
+
+bool	Client::getLog(void) const {
+	return (this->Log);
 }
 
 std::ostream& operator<< (std::ostream& os, const Client& client) {
