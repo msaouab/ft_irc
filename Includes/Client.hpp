@@ -10,6 +10,7 @@ class Client
 		char		**user;
 		int			Clientfd;
 		bool		Auth;
+		bool		Log;
 	public:
 		Client();
 		Client &operator=(const Client &rhs);
@@ -19,10 +20,12 @@ class Client
 		void	setNick(std::string _nick);
 		void	setUser(char **_user);
 		void	setAuth(bool _Auth);
+		void	setLog(bool _Auth);
 		int			getClientfd(void) const ;
 		std::string	getNick(void) const ;
 		char	**getUser(void) const ;
 		bool		getAuth() const ;
+		bool		getLog() const ;
 
 };
 
