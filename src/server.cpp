@@ -178,7 +178,7 @@ void	server::Check_user(std::string user, int i)
 	}
 	user = user.substr(5, user.length());
 	userArr = ft_split(user.c_str(), ' ');
-	if (lenArr(userArr) != 4) {
+	if (lenArr(userArr) < 4) {
 		ft_free(userArr);
 		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n";
 		sendError(fds[i].fd, message, RED);
@@ -212,10 +212,11 @@ void 	server::Check_admin(int i)
 		return ;
 	}
 	std::string message;
-	std::map<int, Client>::iterator it = myGuest.begin();
+	std::map<int, Client>::iterator it = myClient.begin();
 	message = RED;
 	message.append("Your IRC server administrator's nickname is ");
 	message.append(it->second.getNick());
+	message.append("\n");
 	message.append(ED);
 	send(fds[i].fd, message.c_str(), message.length(), 0);
 	return ;
