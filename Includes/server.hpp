@@ -28,7 +28,7 @@ class server
 		socklen_t			addrLen;
 		struct sockaddr_in	address;
 		struct pollfd		fds[MAX_CLIENT];
-		std::map<int, Client > myGuest;
+		std::map<int, Client> myGuest;
 		std::map<int, Client> myClient;
 		server();
 		server(int _port, std::string _pswd);
