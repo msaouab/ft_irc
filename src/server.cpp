@@ -130,7 +130,7 @@ int	server::acceptSocket(int n_fds)
 void	server::Check_pass(std::string pass, std::string password, int i)
 {
 	std::string message;
-	message = "Incorrect Password\n";
+	message = "Incorrect Password\n>";
 	if(pass.compare(5, password.length(), password)) {
 		myGuest[fds[i].fd].setAuth(false);
 		sendError(fds[i].fd, message, RED);
@@ -143,7 +143,7 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 void	server::Check_nick(std::string nick, int i)
 {
 	std::string	message;
-	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, message, RED);
 		return ;
@@ -168,7 +168,7 @@ void	server::Check_user(std::string user, int i)
 {
 	char	**userArr;
 	std::string	message;
-	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
 	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, message, RED);
@@ -183,7 +183,7 @@ void	server::Check_user(std::string user, int i)
 	userArr = ft_split(user.c_str(), ' ');
 	if (lenArr(userArr) < 4) {
 		ft_free(userArr);
-		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n";
+		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n>";
 		sendError(fds[i].fd, message, RED);
 		return ;
 	}
@@ -212,7 +212,7 @@ void	server::Check_quit(int i)
 void 	server::Check_admin(int i)
 {
 	std::string auterror;
-	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, auterror, RED);
 		return ;
@@ -222,7 +222,7 @@ void 	server::Check_admin(int i)
 	message = RED;
 	message.append("Your IRC server administrator's nickname is ");
 	message.append(it->second.getNick());
-	message.append("\n");
+	message.append("\n>");
 	message.append(ED);
 	send(fds[i].fd, message.c_str(), message.length(), 0);
 	return ;
@@ -232,7 +232,7 @@ void 	server::Check_admin(int i)
 void 	server::Check_who(int i)
 {
 	std::string auterror;
-	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, auterror, RED);
 		return ;
@@ -252,18 +252,18 @@ void 	server::Check_who(int i)
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
-	message = "Command not found\n";
-	if (!input.compare(0, 4, "PASS"))
+	message = "Input not supported\n>";
+	if (!input.compare(0, 4, "PASS") && input.length() > 4)
 		Check_pass(input, password, i);
-	else if (!(input.compare(0, 4, "NICK")))
+	else if (!(input.compare(0, 4, "NICK")) && input.length() > 4)
 		Check_nick(input, i);
-	else if (!(input.compare(0, 4, "USER")))
+	else if (!(input.compare(0, 4, "USER")) && input.length() > 4)
 		Check_user(input, i);
-	else if (!(input.compare(0, 4, "QUIT")))
+	else if (!(input.compare(0, 4, "QUIT")) && input.length() > 4)
 		Check_quit(i);
-	else if (!(input.compare(0, 5, "ADMIN")))
+	else if (!(input.compare(0, 5, "ADMIN")) && input.length() > 5)
 		Check_admin(i);
-	else if (!(input.compare(0, 3, "WHO")))
+	else if (!(input.compare(0, 3, "WHO")) && input.length() > 3)
 		Check_who(i);
 	else
 		sendError(fds[i].fd, message, RED);
