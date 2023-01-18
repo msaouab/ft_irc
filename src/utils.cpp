@@ -21,3 +21,10 @@ int	lenArr(char **arr)
 		i++;
 	return (i);
 }
+
+void	ft_free(char **arr)
+{
+	for (int i = 0; i < lenArr(arr); i++)
+		free (arr[i]);
+	free (arr);
+}

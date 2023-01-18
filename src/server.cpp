@@ -163,6 +163,7 @@ void	server::Check_nick(std::string nick, int i)
 
 void	server::Check_user(std::string user, int i)
 {
+	char	**userArr;
 	std::string	message;
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
@@ -170,21 +171,29 @@ void	server::Check_user(std::string user, int i)
 		sendError(fds[i].fd, message, RED);
 		return ;
 	}
-	char	**userArr;
+	message = "Please enter your USER before USER :)\n";
+	if (myGuest[fds[i].fd].getNick() == "") {
+		sendError(fds[i].fd, message, RED);
+		return ;
+	}
 	user = user.substr(5, user.length());
 	userArr = ft_split(user.c_str(), ' ');
 	if (lenArr(userArr) != 4) {
+		ft_free(userArr);
 		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n";
 		sendError(fds[i].fd, message, RED);
 		return ;
 	}
 	myGuest[fds[i].fd].setUser(userArr);
+	if (myGuest[fds[i].fd].getAuth())
+		myClient[fds[i].fd] = myGuest[fds[i].fd];
+	ft_free(userArr);
 }
 
 void	server::Check_quit(int i)
 {
 	std::string	message;
-	message = "You are leaving the server.\nsee you later :)";
+	message = "You are leaving the server.\nsee you later :)\n";
 	sendError(fds[i].fd, message, GREEN);
 	myGuest.erase(fds[i].fd);
 	std::map<int, Client>::iterator it;

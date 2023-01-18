@@ -36,5 +36,6 @@
 
 bool		isNumber(std::string str);
 int			lenArr(char **arr);
+void		ft_free(char **arr);
 
 #endif /* _IRC_SERV_HPP__ */
