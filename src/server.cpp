@@ -225,6 +225,7 @@ bool	server::recvMessage(int i)
 	}
 	if (rc == 0) {
 		std::cout << "Connection closed" << std::endl;
+		myGuest.erase(fds[i].fd);
 		st_conx = true;
 		return (false);
 	}
