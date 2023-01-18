@@ -53,6 +53,7 @@ class server
 		void		Check_nick(std::string nick, int i);
 		void		Check_user(std::string user, int i);
 		void		Check_quit(int i);
+		void 		Check_admin(int i);
 		std::string	_welcomemsg(void);
 		void		sendError(int fd, std::string msg, std::string color);
 

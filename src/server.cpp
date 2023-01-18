@@ -194,6 +194,24 @@ void	server::Check_quit(int i)
 	close(fds[i].fd);
 }
 
+void 	server::Check_admin(int i)
+{
+	std::string auterror;
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	if (!myGuest[fds[i].fd].getAuth()) {
+		sendError(fds[i].fd, auterror, RED);
+		return ;
+	}
+	std::string message;
+	std::map<int, Client>::iterator it = myGuest.begin();
+	message = RED;
+	message.append("Your IRC server administrator's nickname is ");
+	message.append(it->second.getNick());
+	message.append(ED);
+	send(fds[i].fd, message.c_str(), message.length(), 0);
+	return ;
+	
+}
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
@@ -206,6 +224,8 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_user(input, i);
 	else if (!(input.compare(0, 4, "QUIT")))
 		Check_quit(i);
+	else if (!(input.compare(0, 5, "ADMIN")))
+		Check_admin(i);
 	else
 		sendError(fds[i].fd, message, RED);
 }
