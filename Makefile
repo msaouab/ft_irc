@@ -31,18 +31,20 @@ all : credit $(NAME)
 
 credit:
 	@echo "\n"
-	@echo "$(GREEN)\t╔════╗╔══╦══╗   ╔══╦══╗╔══╗  ╔════╗$(ED)"
-	@echo "$(GREEN)\t║        ║         ║   ║  ║  ║     $(ED)"
-	@echo "$(GREEN)\t╠════    ║         ║   ╠══╩═╗║     $(ED)"
-	@echo "$(GREEN)\t║        ║ ════ ╚══╩══╝║    ║╚════╝$(ED)"
-	@echo "$(GREEN)\t┃ $(ED)By: $(MAG)msaouab - iqessam - ygbouri$(GREEN) ┃$(ED)\n"
+	@echo "$(GREEN)\r\t╔════╗╔══╦══╗   ╔══╦══╗╔══╗  ╔════╗$(ED)"
+	@echo "$(GREEN)\r\t║        ║         ║   ║  ║  ║     $(ED)"
+	@echo "$(GREEN)\r\t╠════    ║         ║   ╠══╩═╗║     $(ED)"
+	@echo "$(GREEN)\r\t║        ║ ════ ╚══╩══╝║    ║╚════╝$(ED)"
+	@echo "$(GREEN)\r\t┃ $(ED)By: $(MAG)msaouab - iqessam - ygbouri$(GREEN) ┃$(ED)\n"
 
 $(NAME): $(OBJ) $(HEADERS)
-		$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
-		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)Compilation Done.$(ED)"
+		@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+		@echo "$(LINE_CLEAR) $(BOLD)$(MAG)\r\t Compilation Done.$(ED)"
 
 %.o:%.cpp $(HEADERS)
-	$(CC) $(CFLAGS) -o $@ -c $<
+	@printf "$(YELLOW)Compiling$(ED) $<:\r\t\t\t\t\t..."
+	@$(CC) $(CFLAGS) -o $@ -c $<
+	@echo "\r\t\t\t\t\t$(GREEN){DONE}$(ED)"
 
 clean: 
 		@$(RM) $(OBJ)
