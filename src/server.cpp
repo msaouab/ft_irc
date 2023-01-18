@@ -185,9 +185,9 @@ void	server::Check_user(std::string user, int i)
 		return ;
 	}
 	myGuest[fds[i].fd].setUser(userArr);
-	ft_free(userArr);
 	if (myGuest[fds[i].fd].getAuth())
 		myClient[fds[i].fd] = myGuest[fds[i].fd];
+	ft_free(userArr);
 }
 
 void	server::Check_quit(int i)
