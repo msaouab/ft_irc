@@ -187,7 +187,8 @@ void	server::Check_user(std::string user, int i)
 		sendError(fds[i].fd, message, RED);
 		return ;
 	}
-	myGuest[fds[i].fd].setUser(userArr);
+	myGuest[fds[i].fd].setUser(userArr[0]);
+	myGuest[fds[i].fd].setRealname(userArr[3]);
 	if (myGuest[fds[i].fd].getAuth())
 	{
 		myClient[fds[i].fd] = myGuest[fds[i].fd];
@@ -212,7 +213,7 @@ void	server::Check_quit(int i)
 void 	server::Check_admin(int i)
 {
 	std::string auterror;
-	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, auterror, RED);
 		return ;
@@ -222,28 +223,48 @@ void 	server::Check_admin(int i)
 	message = RED;
 	message.append("Your IRC server administrator's nickname is ");
 	message.append(it->second.getNick());
-	message.append("\n>");
+	message.append("\n> ");
 	message.append(ED);
 	send(fds[i].fd, message.c_str(), message.length(), 0);
 	return ;
 	
 }
 
-void 	server::Check_who(int i)
+void 	server::Check_who(std::string input, int i)
 {
 	std::string auterror;
-	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
+	std::string notFound;
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	notFound = "USER not found\n>  ";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, auterror, RED);
 		return ;
 	}
 	std::string message;
-	std::map<int, Client>::iterator it = myClient.begin();
-	message = RED;
-	message.append("Your IRC server administrator's nickname is ");
+	std::map<int, Client>::iterator it;
+	std::string tmp;
+	input = input.substr(4, input.length() - 4);
+	for (it = myGuest.begin(); it != myGuest.end(); it++) {
+		if (it->second.getNick() == input)
+			break;
+		else
+		{	
+			sendError(fds[i].fd, notFound, RED);
+			return ;
+		}
+		
+	}
+	message = YELLOW;
+	message.append("Who request: Nickname ");
 	message.append(it->second.getNick());
-	message.append("\n");
-	message.append(ED);
+	message.append(" Username ");
+	message.append(it->second.getUser());
+	message.append(" And the real name is  ");
+	message.append(it->second.getRealname());
+	send(fds[i].fd, message.c_str(), message.length(), 0);
+	message = RED;
+	message.append("\n> ");
+	message = ED;
 	send(fds[i].fd, message.c_str(), message.length(), 0);
 	return ;
 	
@@ -252,19 +273,19 @@ void 	server::Check_who(int i)
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
-	message = "Input not supported\n>";
+	message = "Input not supported\n> ";
 	if (!input.compare(0, 4, "PASS") && input.length() > 4)
 		Check_pass(input, password, i);
 	else if (!(input.compare(0, 4, "NICK")) && input.length() > 4)
 		Check_nick(input, i);
 	else if (!(input.compare(0, 4, "USER")) && input.length() > 4)
 		Check_user(input, i);
-	else if (!(input.compare(0, 4, "QUIT")) && input.length() > 4)
+	else if (!(input.compare(0, 4, "QUIT")))
 		Check_quit(i);
-	else if (!(input.compare(0, 5, "ADMIN")) && input.length() > 5)
+	else if (!(input.compare(0, 5, "ADMIN")))
 		Check_admin(i);
 	else if (!(input.compare(0, 3, "WHO")) && input.length() > 3)
-		Check_who(i);
+		Check_who(input, i);
 	else
 		sendError(fds[i].fd, message, RED);
 }

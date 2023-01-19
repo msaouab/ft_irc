@@ -7,7 +7,8 @@ class Client
 {
 	private:
 		std::string	nick;
-		char		**user;
+		std::string	user;
+		std::string	realname;
 		int			Clientfd;
 		bool		Auth;
 		bool		Log;
@@ -18,12 +19,14 @@ class Client
 
 		void	setClientfd(int _clientfd);
 		void	setNick(std::string _nick);
-		void	setUser(char **_user);
+		void	setUser(std::string _user);
+		void	setRealname(std::string real);
 		void	setAuth(bool _Auth);
 		void	setLog(bool _Auth);
 		int			getClientfd(void) const ;
 		std::string	getNick(void) const ;
-		char	**getUser(void) const ;
+		std::string getUser(void) const ;
+		std::string getRealname(void) const ;
 		bool		getAuth() const ;
 		bool		getLog() const ;
 
