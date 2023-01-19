@@ -6,7 +6,8 @@ Client::Client() {
 	this->Log = false;
 	this->Clientfd = 0;
 	this->nick = "";
-	this->user = NULL;
+	this->user = "";
+	this->realname = "";
 }
 
 Client &Client::operator=(const Client &rhs) {
@@ -32,8 +33,12 @@ void	Client::setLog(bool _Log) {
 	this->Log = _Log;
 }
 
-void	Client::setUser(char **_user) {
+void	Client::setUser(std::string _user) {
 	this->user = _user;
+}
+
+void	Client::setRealname(std::string _real) {
+	this->realname = _real;
 }
 
 int		Client::getClientfd(void) const {
@@ -42,9 +47,14 @@ int		Client::getClientfd(void) const {
 std::string	Client::getNick(void) const {
 	return (this->nick);
 }
-char**	Client::getUser(void) const {
+std::string	Client::getUser(void) const {
 	return (this->user);
 }
+
+std::string	Client::getRealname(void) const {
+	return (this->realname);
+}
+
 bool	Client::getAuth(void) const {
 	return (this->Auth);
 }
