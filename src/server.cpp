@@ -149,7 +149,7 @@ void	server::Check_nick(std::string nick, int i)
 		sendError(fds[i].fd, message, RED);
 		return ;
 	}
-	message = "this nickname already exist\n";
+	message = "this nickname already exist\n> ";
 	nick = nick.substr(5, nick.length());
 	std::map<int, Client>::iterator it;
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
@@ -234,7 +234,7 @@ void 	server::Check_admin(int i)
 
 std::string printTime(void)
 {
-	std::string _time = "Today is ";
+	std::string _time;
 	struct timeval tv;
 	time_t	time;
 	struct tm *info;
@@ -249,7 +249,9 @@ std::string printTime(void)
 
 void server::Check_time(int i)
 {
-	sendError(fds[i].fd, printTime(), RED);
+	std::string p = "Today is";
+	p.append(printTime());
+	sendError(fds[i].fd, p, RED);
 }
 
 void 	server::Check_who(std::string input, int i)
@@ -304,7 +306,7 @@ void 	server::Check_privmsg(std::string input, int i)
 	message = "PRIVMSG: Syntax Error\n> ";
 	input = input.substr(8, input.length());
 	data = ft_split(input.c_str(), ' ');
-	if (lenArr(data) != 2 || data[1][0] != ':') 
+	if (lenArr(data) < 2 || data[1][0] != ':') 
 	{
 		ft_free(data);
 		sendError(fds[i].fd, message, RED);
@@ -313,16 +315,25 @@ void 	server::Check_privmsg(std::string input, int i)
 		// sendError(fds[i].fd, "OK\n", GREEN);
 	std::map<int, Client>::iterator it;
 	std::string destination = data[0];
+	std::string msg = data[1];
+	msg = msg.substr(1, msg.length() -1);
+	int n = 1;
+	while(data[++n])
+	{
+		msg.append(data[n]);
+		msg.append(" ");
+	}
 	std::string prefix = " Message from ";
 	prefix.append(myClient[fds[i].fd].getNick());
 	prefix.append(":\t");
 	// std::map<std::string, Channel> channels;
 	for (it = myClient.begin(); it != myClient.end(); it++){
-		if (it->second.getNick() == destination){
+		if (it->second.getNick() == destination)
+		{
 			sendError(it->first, printTime(), GRAY);
 			sendError(it->first, prefix, RED);
-			sendError(it->first, data[1], ED);
-			sendError(it->first, "\n>", ED);
+			sendError(it->first, msg, ED);
+			sendError(it->first, "\n> ", RED);
 			sendError(fds[i].fd, "Message sent !\n> ", RED);
 			return ;
 		}
