@@ -54,7 +54,9 @@ class server
 		void		Check_user(std::string user, int i);
 		void		Check_quit(int i);
 		void 		Check_admin(int i);
+		void 		Check_time(int i);
 		void 		Check_who(std::string input, int i);
+		void 		Check_privmsg(std::string input, int i);
 		std::string	_welcomemsg(void);
 		void		sendError(int fd, std::string msg, std::string color);
 

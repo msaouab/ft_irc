@@ -11,9 +11,12 @@ Client::Client() {
 }
 
 Client &Client::operator=(const Client &rhs) {
-	this->Clientfd = rhs.Clientfd;
 	this->nick = rhs.nick;
 	this->user = rhs.user;
+	this->realname = rhs.realname;
+	this->Clientfd = rhs.Clientfd;
+	this->Auth = rhs.Auth;
+	this->Log = rhs.Log;
 	return (*this);
 }
 Client::~Client() {
