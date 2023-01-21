@@ -38,7 +38,7 @@ std::string	server::_welcomemsg(int fd)
 	return (welcome);
 }
 
-void	sendError(int fd, std::string msg, std::string color)
+void	sendMsg(int fd, std::string msg, std::string color)
 {
 	std::string	message;
 	message = color;
