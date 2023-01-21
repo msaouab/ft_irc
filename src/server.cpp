@@ -130,14 +130,17 @@ int	server::acceptSocket(int n_fds)
 void	server::Check_pass(std::string pass, std::string password, int i)
 {
 	std::string message;
-	message = "Incorrect Password\n>";
-	if(pass.compare(5, password.length(), password)) {
+	pass = pass.substr(5, pass.length());
+	message = "Incorrect Password\n> ";
+	if(pass != password) 
+	{
 		myGuest[fds[i].fd].setAuth(false);
 		sendError(fds[i].fd, message, RED);
 		return ;
     }
-	myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
-	myGuest[fds[i].fd].setAuth(true);
+		std::cout << "Fd in pass " << fds[i].fd << std::endl;
+		myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
+		myGuest[fds[i].fd].setAuth(true);
 }
 
 void	server::Check_nick(std::string nick, int i)
@@ -148,7 +151,7 @@ void	server::Check_nick(std::string nick, int i)
 		sendError(fds[i].fd, message, RED);
 		return ;
 	}
-	message = "this nickname already exist\n";
+	message = "this nickname already exist\n> ";
 	nick = nick.substr(5, nick.length());
 	std::map<int, Client>::iterator it;
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
@@ -230,44 +233,108 @@ void 	server::Check_admin(int i)
 	
 }
 
+
+std::string printTime(void)
+{
+	std::string _time;
+	struct timeval tv;
+	time_t	time;
+	struct tm *info;
+	gettimeofday(&tv, NULL);
+	time = tv.tv_sec;
+	info = localtime(&time);
+	_time.append(asctime(info));
+	_time.append("> ");
+	return(_time);
+}
+
+
+void server::Check_time(int i)
+{
+	std::string p = "Today is";
+	p.append(printTime());
+	sendError(fds[i].fd, p, RED);
+}
+
 void 	server::Check_who(std::string input, int i)
 {
 	std::string auterror;
 	std::string notFound;
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
-	notFound = "USER not found\n>  ";
+	notFound = "USER not found\n> ";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, auterror, RED);
 		return ;
 	}
 	std::string message;
 	std::map<int, Client>::iterator it;
-	std::string tmp;
 	input = input.substr(4, input.length() - 4);
-	for (it = myGuest.begin(); it != myGuest.end(); it++) {
+	for (it = myClient.begin(); it != myClient.end(); it++) {
 		if (it->second.getNick() == input)
-			break;
-		else
-		{	
-			sendError(fds[i].fd, notFound, RED);
+		{
+			message = YELLOW;
+			message.append("WHO request: Nickname ");
+			message.append(it->second.getNick());
+			message.append(" Username ");
+			message.append(it->second.getUser());
+			message.append(" And the real name is ");
+			message.append(it->second.getRealname());
+			send(fds[i].fd, message.c_str(), message.length(), 0);
+			message = "\n> ";
+			message.append(ED);
+			send(fds[i].fd, message.c_str(), message.length(), 0);
 			return ;
 		}
-		
 	}
-	message = YELLOW;
-	message.append("Who request: Nickname ");
-	message.append(it->second.getNick());
-	message.append(" Username ");
-	message.append(it->second.getUser());
-	message.append(" And the real name is  ");
-	message.append(it->second.getRealname());
-	send(fds[i].fd, message.c_str(), message.length(), 0);
-	message = RED;
-	message.append("\n> ");
-	message = ED;
-	send(fds[i].fd, message.c_str(), message.length(), 0);
+	sendError(fds[i].fd, notFound, RED);
 	return ;
-	
+}
+
+void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax user PRVMSG on channels
+{
+	std::string	message;
+	char **data;
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myClient[fds[i].fd].getAuth()) {
+		sendError(fds[i].fd, auterror, RED);
+		return ;
+	}
+	message = "PRIVMSG: Syntax Error\n> ";
+	input = input.substr(8, input.length());
+	data = ft_split(input.c_str(), ' ');
+	if (lenArr(data) < 2 || data[1][0] != ':') 
+	{
+		ft_free(data);
+		sendError(fds[i].fd, message, RED);
+		return ;
+	}
+	std::map<int, Client>::iterator it;
+	std::string destination = data[0];
+	std::string msg = data[1];
+	msg = msg.substr(1, msg.length() -1);
+	int n = 0;
+	while(data[++n])
+	{
+		msg.append(data[n]);
+		msg.append(" ");
+	}
+	std::string prefix = " Message from ";
+	prefix.append(myClient[fds[i].fd].getNick());
+	prefix.append(":\t");
+	// std::map<std::string, Channel> channels;
+	for (it = myClient.begin(); it != myClient.end(); it++){
+		if (it->second.getNick() == destination)
+		{
+			sendError(it->first, printTime(), GRAY);
+			sendError(it->first, prefix, RED);
+			sendError(it->first, msg, ED);
+			sendError(it->first, "\n> ", RED);
+			sendError(fds[i].fd, "Message sent !\n> ", RED);
+			return ;
+		}
+			
+	}
+	sendError(fds[i].fd, "Destination not found!! \n> ", RED);
 }
 
 void	server::Parse_cmd(std::string input, int i)
@@ -284,8 +351,12 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_quit(i);
 	else if (!(input.compare(0, 5, "ADMIN")))
 		Check_admin(i);
+	else if (!(input.compare(0, 4, "TIME")))
+		Check_time(i);
 	else if (!(input.compare(0, 3, "WHO")) && input.length() > 3)
 		Check_who(input, i);
+	else if (!(input.compare(0, 7, "PRIVMSG")) && input.length() > 7 && std::count(input.begin(), input.end(), ':') == 1)
+		Check_privmsg(input, i);
 	else
 		sendError(fds[i].fd, message, RED);
 }
