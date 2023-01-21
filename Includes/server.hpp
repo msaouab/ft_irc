@@ -47,7 +47,7 @@ class server
 		bool		WaitClient();
 		int			acceptSocket(int n_fds);
 		bool		recvMessage(int i);
-		// void		sendMessage();
+		//COMMANDS TO PARS START
 		void		Parse_cmd(std::string input, int i);
 		void 		Check_pass(std::string pass, std::string password, int i);
 		void		Check_nick(std::string nick, int i);
@@ -57,8 +57,11 @@ class server
 		void 		Check_time(int i);
 		void 		Check_who(std::string input, int i);
 		void 		Check_privmsg(std::string input, int i);
+		void 		Check_notice(std::string input, int i);
+		//COMMANDS TO PARS END
 		std::string	_welcomemsg(void);
 		void		sendError(int fd, std::string msg, std::string color);
+		void 		single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message);
 
 		class ErrorPortException : public std::exception
 		{
