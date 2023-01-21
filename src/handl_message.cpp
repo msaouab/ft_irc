@@ -1,7 +1,7 @@
 
 # include "../Includes/ircserv.hpp"
 
-std::string	server::_welcomemsg(void)
+std::string	server::_welcomemsg(int fd)
 {
 	struct timeval tv;
 	time_t	time;
@@ -9,6 +9,8 @@ std::string	server::_welcomemsg(void)
 	char buffer[64];
 	gettimeofday(&tv, NULL);
 	time = tv.tv_sec;
+	std::cout << "time: ==> " << time << std::endl;
+	myGuest[fd].setTime(time);
 	info = localtime(&time);
 	std::string welcome = GREEN;
 	welcome.append("\n\n");
@@ -21,7 +23,7 @@ std::string	server::_welcomemsg(void)
 	welcome.append(ED);
 	welcome.append(GRAY);
 	welcome.append(asctime(info));
-	strftime (buffer, sizeof buffer, "Today is %A, %B %d.\n", info);
+	strftime (buffer, sizeof(buffer), "Today is %A, %B %d.\n", info);
 	welcome.append(ED);
 	welcome.append(BLUE);
 	welcome.append("You need to login so you can start chatting OR you can send HELP to see how :) \n");
@@ -33,7 +35,7 @@ std::string	server::_welcomemsg(void)
 	return (welcome);
 }
 
-void	server::sendError(int fd, std::string msg, std::string color)
+void	sendError(int fd, std::string msg, std::string color)
 {
 	std::string	message;
 	message = color;

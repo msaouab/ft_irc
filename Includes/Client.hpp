@@ -7,9 +7,11 @@ class Client
 {
 	private:
 		std::string	nick;
+		std::string	ip;
 		char		**user;
 		int			Clientfd;
 		bool		Auth;
+		long		time;
 	public:
 		Client();
 		Client &operator=(const Client &rhs);
@@ -19,10 +21,14 @@ class Client
 		void	setNick(std::string _nick);
 		void	setUser(char **_user);
 		void	setAuth(bool _Auth);
+		void		setIP(std::string _ip);
+		void		setTime(long time);
 		int			getClientfd(void) const ;
 		std::string	getNick(void) const ;
-		char	**getUser(void) const ;
+		std::string	getIP() const ;
+		char		**getUser(void) const ;
 		bool		getAuth() const ;
+		long		getTime() const ;
 
 };
 

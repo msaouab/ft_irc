@@ -3,7 +3,6 @@
 # define _SERVER_HPP__
 
 # include "./ircserv.hpp"
-// # include "./Client.hpp"
 
 # define MAX_CLIENT 17
 # define TIMEOUT (10 * 60 * 1000)
@@ -54,8 +53,7 @@ class server
 		void		Check_user(std::string user, int i);
 		void		Check_quit(int i);
 		void 		Check_admin(int i);
-		std::string	_welcomemsg(void);
-		void		sendError(int fd, std::string msg, std::string color);
+		std::string	_welcomemsg(int fd);
 
 		class ErrorPortException : public std::exception
 		{

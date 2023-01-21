@@ -1,5 +1,6 @@
 
 #include "../Includes/server.hpp"
+# include "../Includes/Bot.hpp"
 
 server::server() {
 }
@@ -105,7 +106,7 @@ bool	server::WaitClient()
 int	server::acceptSocket(int n_fds)
 {
 	int	new_sd;
-	std::string welcome = _welcomemsg();
+	std::string	ip_addr;
 
 	new_sd = -1;
 	while (new_sd == -1) {
@@ -117,7 +118,10 @@ int	server::acceptSocket(int n_fds)
 			}
 			break ;
 		}
+		std::string welcome = _welcomemsg(new_sd);
 		std::cout << "New incomming connection ==> " << new_sd << std::endl;
+		ip_addr = inet_ntoa(address.sin_addr);
+		myGuest[new_sd].setIP(ip_addr);
 		if (send(new_sd, welcome.c_str(), welcome.length(), 0) <= 0)
 			std::cout << strerror(errno);
 		fds[n_fds].fd = new_sd;
@@ -235,6 +239,8 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_quit(i);
 	else if (!(input.compare(0, 5, "ADMIN")))
 		Check_admin(i);
+	else if (!(input.compare(0, 4, "/BOT")) && input.length() > 4)
+		CreateBot(myClient, input, fds[i].fd);
 	else
 		sendError(fds[i].fd, message, RED);
 }
