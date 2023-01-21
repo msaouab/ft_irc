@@ -147,8 +147,14 @@ void	server::Check_nick(std::string nick, int i)
 {
 	std::string	message;
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
+	std::string hash = "Please remove #/$ from your name\n>";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendError(fds[i].fd, message, RED);
+		return ;
+	}
+	if(std::count(nick.begin(), nick.end(), '#') || std::count(nick.begin(), nick.end(), '&'))
+	{
+		sendError(fds[i].fd, hash, RED);
 		return ;
 	}
 	message = "this nickname already exist\n> ";
@@ -256,7 +262,7 @@ void server::Check_time(int i)
 	sendError(fds[i].fd, p, RED);
 }
 
-void 	server::Check_who(std::string input, int i)
+void 	server::Check_who(std::string input, int i) // add who for operators
 {
 	std::string auterror;
 	std::string notFound;
@@ -290,6 +296,23 @@ void 	server::Check_who(std::string input, int i)
 	return ;
 }
 
+void server::single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message)
+{
+	std::string prefix = " Message from ";
+	prefix.append(source);
+	prefix.append(":\t");
+	sendError(destination_fd, printTime(), GRAY);
+	sendError(destination_fd, prefix, RED);
+	sendError(destination_fd, message, ED);
+	sendError(destination_fd, "\n> ", RED);
+	sendError(source_fd, "Message sent !\n> ", RED);
+
+
+}
+
+
+
+
 void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax user PRVMSG on channels
 {
 	std::string	message;
@@ -310,31 +333,31 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax
 	}
 	std::map<int, Client>::iterator it;
 	std::string destination = data[0];
-	std::string msg = data[1];
-	msg = msg.substr(1, msg.length() -1);
+	std::string msg;
 	int n = 0;
 	while(data[++n])
 	{
 		msg.append(data[n]);
 		msg.append(" ");
 	}
-	std::string prefix = " Message from ";
-	prefix.append(myClient[fds[i].fd].getNick());
-	prefix.append(":\t");
+	msg = msg.substr(1, msg.length() - 1);
 	// std::map<std::string, Channel> channels;
 	for (it = myClient.begin(); it != myClient.end(); it++){
-		if (it->second.getNick() == destination)
-		{
-			sendError(it->first, printTime(), GRAY);
-			sendError(it->first, prefix, RED);
-			sendError(it->first, msg, ED);
-			sendError(it->first, "\n> ", RED);
-			sendError(fds[i].fd, "Message sent !\n> ", RED);
-			return ;
-		}
+	if (it->second.getNick() == destination)
+	{
+		single_prvmsg(fds[i].fd, it->first, myClient[fds[i].fd].getNick(), msg);
+		return ;
+	}
 			
 	}
 	sendError(fds[i].fd, "Destination not found!! \n> ", RED);
+}
+
+void	server::Check_notice(std::string input, int i)
+{
+  (void)input;
+  (void)i;
+
 }
 
 void	server::Parse_cmd(std::string input, int i)
@@ -357,6 +380,8 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_who(input, i);
 	else if (!(input.compare(0, 7, "PRIVMSG")) && input.length() > 7 && std::count(input.begin(), input.end(), ':') == 1)
 		Check_privmsg(input, i);
+	else if (!(input.compare(0, 6, "NOTICE")) && input.length() > 6)
+		Check_notice(input, i);
 	else
 		sendError(fds[i].fd, message, RED);
 }
