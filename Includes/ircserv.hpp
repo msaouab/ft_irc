@@ -28,14 +28,19 @@
 # include <map>
 # include <ctime>
 # include <chrono>
+# include <sys/types.h>
+# include <netdb.h>
+# include <arpa/inet.h>
 
 # include "./server.hpp"
 # include "./Client.hpp"
+# include "./Bot.hpp"
 
 // struct sockaddr_in	address;
 
 bool		isNumber(std::string str);
 int			lenArr(char **arr);
 void		ft_free(char **arr);
+void		sendError(int fd, std::string msg, std::string color);
 
 #endif /* _IRC_SERV_HPP__ */
