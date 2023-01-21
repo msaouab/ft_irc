@@ -67,5 +67,5 @@ class server
 };
 
 char	**ft_split(char const *s, char c);
-
+std::string printTime(void);
 #endif /* _SERVER_HPP__ */
