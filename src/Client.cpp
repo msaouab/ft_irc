@@ -8,6 +8,8 @@ Client::Client() {
 	this->nick = "";
 	this->user = "";
 	this->realname = "";
+	this->ip = "";
+	this->time = 0;
 }
 
 Client &Client::operator=(const Client &rhs) {
@@ -17,6 +19,8 @@ Client &Client::operator=(const Client &rhs) {
 	this->Clientfd = rhs.Clientfd;
 	this->Auth = rhs.Auth;
 	this->Log = rhs.Log;
+	this->ip = rhs.ip;
+	this->time = rhs.time;
 	return (*this);
 }
 Client::~Client() {
@@ -43,6 +47,12 @@ void	Client::setUser(std::string _user) {
 void	Client::setRealname(std::string _real) {
 	this->realname = _real;
 }
+void	Client::setIP(std::string _ip) {
+	this->ip = _ip;
+}
+void	Client::setTime(long _time) {
+	this->time = _time;
+}
 
 int		Client::getClientfd(void) const {
 	return (this->Clientfd);
@@ -64,6 +74,12 @@ bool	Client::getAuth(void) const {
 
 bool	Client::getLog(void) const {
 	return (this->Log);
+}
+std::string		Client::getIP() const {
+	return (this->ip);
+}
+long		Client::getTime() const {
+	return (this->time);
 }
 
 std::ostream& operator<< (std::ostream& os, const Client& client) {

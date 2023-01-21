@@ -19,6 +19,7 @@ RM = rm -f
 SRC =	./src/main.cpp\
 		./src/server.cpp\
 		./src/Client.cpp\
+		./src/Bot.cpp\
 		./src/utils.cpp\
 		./src/ft_split.cpp\
 		./src/handl_message.cpp

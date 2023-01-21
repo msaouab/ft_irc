@@ -59,8 +59,7 @@ class server
 		void 		Check_privmsg(std::string input, int i);
 		void 		Check_notice(std::string input, int i);
 		//COMMANDS TO PARS END
-		std::string	_welcomemsg(void);
-		void		sendError(int fd, std::string msg, std::string color);
+		std::string	_welcomemsg(int fd);
 		void 		single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message);
 
 		class ErrorPortException : public std::exception
@@ -71,4 +70,5 @@ class server
 
 char	**ft_split(char const *s, char c);
 std::string printTime(void);
+
 #endif /* _SERVER_HPP__ */

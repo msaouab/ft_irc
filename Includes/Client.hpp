@@ -9,9 +9,11 @@ class Client
 		std::string	nick;
 		std::string	user;
 		std::string	realname;
+		std::string	ip;
 		int			Clientfd;
 		bool		Auth;
 		bool		Log;
+		long		time;
 	public:
 		Client();
 		Client &operator=(const Client &rhs);
@@ -23,12 +25,16 @@ class Client
 		void	setRealname(std::string real);
 		void	setAuth(bool _Auth);
 		void	setLog(bool _Auth);
+		void	setIP(std::string _ip);
+		void	setTime(long time);
 		int			getClientfd(void) const ;
 		std::string	getNick(void) const ;
 		std::string getUser(void) const ;
 		std::string getRealname(void) const ;
+		std::string	getIP() const ;
 		bool		getAuth() const ;
 		bool		getLog() const ;
+		long		getTime() const ;
 
 };
 
