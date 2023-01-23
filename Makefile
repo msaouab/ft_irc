@@ -23,6 +23,7 @@ SRC =	./src/main.cpp\
 		./src/utils.cpp\
 		./src/ft_split.cpp\
 		./src/handl_message.cpp
+		# ./src/dcc.cpp\
 
 HEADERS = Includes/ircserv.hpp
 

@@ -2,7 +2,9 @@
 #include "../Includes/server.hpp"
 #include "../Includes/Bot.hpp"
 
-server::server() {
+server::server() 
+{
+
 }
 
 server::server(int _port, std::string _pswd) {
@@ -271,9 +273,10 @@ void 	server::Check_who(std::string input, int i) // add who for operators
 	std::string auterror;
 	std::string notFound;
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
-	notFound = "USER not found\n> ";
+	notFound = ":localhost 352 " + this->getNick() + " :USER not found\r\n> ";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, auterror, RED);
+		sendMsg(fds[i].fd, ":localhost 315 " + this->getNick() + " :END of /WHO list\r\n", RED);
 		return ;
 	}
 	std::string message;
@@ -310,14 +313,10 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 	sendMsg(destination_fd, message, ED);
 	sendMsg(destination_fd, "\n> ", RED);
 	sendMsg(source_fd, "Message sent !\n> ", RED);
-
-
 }
 
 
-
-
-void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax user PRVMSG on channels
+void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on channels
 {
 	std::string	message;
 	char **data;
@@ -344,6 +343,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax
 		msg.append(data[n]);
 		msg.append(" ");
 	}
+	ft_free(data);
 	msg = msg.substr(1, msg.length() - 1);
 	// std::map<std::string, Channel> channels;
 	for (it = myClient.begin(); it != myClient.end(); it++){
@@ -359,14 +359,77 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax
 
 void	server::Check_notice(std::string input, int i)
 {
-  (void)input;
-  (void)i;
+  	std::string	message;
+	char **data;
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myClient[fds[i].fd].getAuth()) {
+		sendMsg(fds[i].fd, auterror, RED);
+		return ;
+	}
+	message = "NOTICE: Syntax Error\n> ";
+	input = input.substr(7, input.length());
+	data = ft_split(input.c_str(), ' ');
+	if (lenArr(data) < 2 || data[1][0] != ':') 
+	{
+		ft_free(data);
+		sendMsg(fds[i].fd, message, RED);
+		return ;
+	}
+	std::map<int, Client>::iterator it;
+	std::string destination = data[0];
+	std::string msg;
+	int n = 0;
+	while(data[++n])
+	{
+		msg.append(data[n]);
+		msg.append(" ");
+	}
+	ft_free(data);
+	msg = msg.substr(1, msg.length() - 1);
+	// std::map<std::string, Channel> channels;
+	for (it = myClient.begin(); it != myClient.end(); it++){
+	if (it->second.getNick() == destination)
+	{
+		std::string prefix = " Notice from ";
+		prefix.append(myClient[fds[i].fd].getNick());
+		prefix.append(":\t");
+		sendMsg(it->first, printTime(), GRAY);
+		sendMsg(it->first, prefix, RED);
+		sendMsg(it->first, msg, ED);
+		sendMsg(it->first, "\n> ", RED);
+		sendMsg(fds[i].fd, "Notice sent !\n> ", RED);
+	}
+			
+	}
+	sendMsg(fds[i].fd, "Destination not found!! \n> ", RED);
 
 }
 
+
+// void 	server::Check_dcc(std::string input, int i)
+// {
+// 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+// 	if (!myClient[fds[i].fd].getAuth()) {
+// 		sendMsg(fds[i].fd, auterror, RED);
+// 		return ;
+// 	}
+// 	std::string	message = "DCC: NOT SUPPORTED!!\n> ";
+// 	input = input.substr(4, input.length() - 4);
+// 	if (!input.compare(0, 4, "SEND") && input.length() > 4)
+// 		dcc_send(input, i);
+// 	else if (!input.compare(0, 6, "ACCEPT") && input.length() > 6)
+// 		dcc_accept(input, i);
+// 	else if (!input.compare(0, 6, "REJECT") && input.length() > 6)
+// 		dcc_reject(input, i);
+// 	else
+// 		sendMsg(fds[i].fd, message, RED);
+
+// }
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
+	std::cout << input << std::endl;
+
 	message = "Input not supported\n> ";
 	if (!input.compare(0, 4, "PASS") && input.length() > 4)
 		Check_pass(input, password, i);
@@ -386,6 +449,8 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_privmsg(input, i);
 	else if (!(input.compare(0, 6, "NOTICE")) && input.length() > 6)
 		Check_notice(input, i);
+	// else if (!(input.compare(0, 3, "DCC")) && input.length() > 3)
+	// 	Check_dcc(input, i);
 	else if (!(input.compare(0, 4, "/BOT")) && input.length() > 4)
 		CreateBot(myClient, input, fds[i].fd);
 	else

@@ -58,6 +58,11 @@ class server
 		void 		Check_who(std::string input, int i);
 		void 		Check_privmsg(std::string input, int i);
 		void 		Check_notice(std::string input, int i);
+		void 		Check_dcc(std::string input, int i);
+		void 		dcc_accept(std::string input, int i);
+		void 		dcc_reject(std::string input, int i);
+		void 		dcc_send(std::string input, int i);
+
 		//COMMANDS TO PARS END
 		std::string	_welcomemsg(int fd);
 		void 		single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message);
