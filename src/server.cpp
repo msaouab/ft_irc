@@ -236,7 +236,7 @@ void 	server::Check_admin(int i)
 	std::string message;
 	std::map<int, Client>::iterator it = myClient.begin();
 	message = RED;
-	message.append("Your IRC server administrator's nickname is ");
+	message.append(":localhost 256 . :Your IRC server administrator's nickname is \r\n");
 	message.append(it->second.getNick());
 	message.append("\n> ");
 	message.append(ED);
