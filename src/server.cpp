@@ -315,7 +315,7 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 {
 	std::string prefix = " Message from ";
 	prefix.append(source);
-	prefix.append(":\t");
+	prefix.append(" ");
 	sendMsg(destination_fd, printTime(), GRAY);
 	sendMsg(destination_fd, prefix, RED);
 	sendMsg(destination_fd, message, ED);
@@ -336,7 +336,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	message = "PRIVMSG: Syntax Error\n> ";
 	input = input.substr(8, input.length());
 	data = ft_split(input.c_str(), ' ');
-	if (lenArr(data) < 2 || data[1][0] != ':') 
+	if (lenArr(data) < 2) 
 	{
 		ft_free(data);
 		sendMsg(fds[i].fd, message, RED);
@@ -352,7 +352,8 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 		msg.append(" ");
 	}
 	ft_free(data);
-	msg = msg.substr(1, msg.length() - 1);
+	if(msg[0] == ':')
+		msg = msg.substr(1, msg.length() - 1);
 	for (it = myClient.begin(); it != myClient.end(); it++){
 		if (it->second.getNick() == destination)
 		{
@@ -790,7 +791,7 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_time(i);
 	else if (!(input.compare(0, 3, "WHO")) && input.length() > 3)
 		Check_who(input, i);
-	else if (!(input.compare(0, 7, "PRIVMSG")) && input.length() > 7 && std::count(input.begin(), input.end(), ':') == 1)
+	else if (!(input.compare(0, 7, "PRIVMSG")) && input.length() > 7)
 		Check_privmsg(input, i);
 	else if (!(input.compare(0, 6, "NOTICE")) && input.length() > 6)
 		Check_notice(input, i);
