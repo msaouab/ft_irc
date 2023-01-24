@@ -23,6 +23,13 @@ Client &Client::operator=(const Client &rhs) {
 	this->time = rhs.time;
 	return (*this);
 }
+
+bool Client::operator==(const Client &rhs) {
+	if (rhs.getClientfd() == this->getClientfd())
+		return (true);
+	return (false);
+}
+
 Client::~Client() {
 }
 
@@ -80,6 +87,16 @@ std::string		Client::getIP() const {
 }
 long		Client::getTime() const {
 	return (this->time);
+}
+
+
+void	Client::setJoinChan( bool _join)
+{
+	this->joinChan = _join;
+}
+
+bool	Client::getJoinChan(void) const{
+	return (this->joinChan);
 }
 
 std::ostream& operator<< (std::ostream& os, const Client& client) {

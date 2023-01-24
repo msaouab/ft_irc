@@ -35,6 +35,7 @@
 # include "./server.hpp"
 # include "./Client.hpp"
 # include "./Bot.hpp"
+# include "./Channel.hpp"
 
 // struct sockaddr_in	address;
 

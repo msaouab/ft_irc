@@ -14,9 +14,11 @@ class Client
 		bool		Auth;
 		bool		Log;
 		long		time;
+		bool		joinChan;
 	public:
 		Client();
 		Client &operator=(const Client &rhs);
+		bool operator==(const Client &rhs);
 		~Client();
 
 		void	setClientfd(int _clientfd);
@@ -35,6 +37,8 @@ class Client
 		bool		getAuth() const ;
 		bool		getLog() const ;
 		long		getTime() const ;
+		bool		getJoinChan() const;
+		void	setJoinChan(bool _join);
 
 };
 
