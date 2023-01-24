@@ -353,14 +353,24 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	}
 	ft_free(data);
 	msg = msg.substr(1, msg.length() - 1);
-	// std::map<std::string, Channel> channels;
 	for (it = myClient.begin(); it != myClient.end(); it++){
-	if (it->second.getNick() == destination)
-	{
-		single_prvmsg(fds[i].fd, it->first, myClient[fds[i].fd].getNick(), msg);
-		return ;
-	}
+		if (it->second.getNick() == destination)
+		{
+			single_prvmsg(fds[i].fd, it->first, myClient[fds[i].fd].getNick(), msg);
+			return ;
+		}
 			
+	}
+	std::map<std::string, Channel>::iterator itChann;
+	std::string chan_msg = GREEN + destination + " " + ED + msg;
+	for(itChann = channels.begin(); itChann != channels.end(); itChann++)
+	{
+		if (itChann->second.getName() == destination)
+		{
+			for (it = itChann->second.usersChann.begin() ; it != itChann->second.usersChann.end(); it++)
+				single_prvmsg(fds[i].fd, it->first, myClient[fds[i].fd].getNick(), chan_msg);
+			return ;
+		}
 	}
 	sendMsg(fds[i].fd, "Destination not found!! \n> ", RED);
 }
@@ -395,18 +405,19 @@ void	server::Check_notice(std::string input, int i)
 	ft_free(data);
 	msg = msg.substr(1, msg.length() - 1);
 	// std::map<std::string, Channel> channels;
-	for (it = myClient.begin(); it != myClient.end(); it++){
-	if (it->second.getNick() == destination)
+	for (it = myClient.begin(); it != myClient.end(); it++)
 	{
-		std::string prefix = " Notice from ";
-		prefix.append(myClient[fds[i].fd].getNick());
-		prefix.append(":\t");
-		sendMsg(it->first, printTime(), GRAY);
-		sendMsg(it->first, prefix, RED);
-		sendMsg(it->first, msg, ED);
-		sendMsg(it->first, "\n> ", RED);
-		sendMsg(fds[i].fd, "Notice sent !\n> ", RED);
-	}
+		if (it->second.getNick() == destination)
+		{
+			std::string prefix = " Notice from ";
+			prefix.append(myClient[fds[i].fd].getNick());
+			prefix.append(":\t");
+			sendMsg(it->first, printTime(), GRAY);
+			sendMsg(it->first, prefix, RED);
+			sendMsg(it->first, msg, ED);
+			sendMsg(it->first, "\n> ", RED);
+			sendMsg(fds[i].fd, "Notice sent !\n> ", RED);
+		}
 			
 	}
 	sendMsg(fds[i].fd, "Destination not found!! \n> ", RED);
@@ -439,7 +450,7 @@ void server::joinToChannel(std::string name, int fd)
 	std::cout << "fd is : " << fd << std::endl;
 	std::string message = "hola in channel name's ";
 	message.append(name);
-	message.append("\n");
+	message.append("\n> ");
 	sendMsg(fds[fd].fd, message, GREEN);
 	int i = 0;
 	std::map<int, Client>::iterator it;
@@ -486,7 +497,7 @@ void server::joinToChannel(std::string name, int fd)
 	message = "hola in channel name's ";
 	message.append(name);
 	message.append(" and fd is: ");
-	message.append("\n");
+	message.append("\n> ");
 	sendMsg(fds[fd].fd, message , GREEN);
 }
 
@@ -508,7 +519,7 @@ void server::createChannel(std::string name, int chec, int fd)
 		if (!chan[1])
 		{
 			ft_free(chan);
-			message = "Wrong password\n";
+			message = "Wrong password\n> ";
 			sendMsg(fds[i].fd, message, RED);
 			/// *************************************************** USE ft_free **********************************************************
 			return ;
@@ -574,7 +585,7 @@ void server::Check_join(std::string join, int fd)
 				{
 					ft_free(chan);
 					/// *************************************************** USE ft_free **********************************************************
-					message = "Password is wrong\n";
+					message = "Password is wrong\n> ";
 					sendMsg(fds[fd].fd, message, RED);
 					return ;
 				}
