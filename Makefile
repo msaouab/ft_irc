@@ -21,8 +21,10 @@ SRC =	./src/main.cpp\
 		./src/Client.cpp\
 		./src/Bot.cpp\
 		./src/utils.cpp\
+		./src/Channel.cpp\
 		./src/ft_split.cpp\
 		./src/handl_message.cpp
+		# ./src/dcc.cpp\
 
 HEADERS = Includes/ircserv.hpp
 

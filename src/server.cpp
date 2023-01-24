@@ -2,7 +2,9 @@
 #include "../Includes/server.hpp"
 #include "../Includes/Bot.hpp"
 
-server::server() {
+server::server() 
+{
+
 }
 
 server::server(int _port, std::string _pswd) {
@@ -216,7 +218,15 @@ void	server::Check_quit(int i)
 	message = "You are leaving the server.\nsee you later :)\n";
 	sendMsg(fds[i].fd, message, GREEN);
 	myGuest.erase(fds[i].fd);
+	myClient.erase(fds[i].fd);
 	std::map<int, Client>::iterator it;
+	std::map<std::string, Channel>::iterator itChan;
+	for(itChan = channels.begin(); itChan != channels.end(); itChan++)
+	{
+		itChan->second.usersAcitve.erase(fds[i].fd);
+		itChan->second.usersChann.erase(fds[i].fd);
+		itChan->second.modes.erase(fds[i].fd);
+	}
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
 		std::cout << it->second.getClientfd() << " ==> " << it->second.getNick() << std::endl;
 	}
@@ -232,12 +242,12 @@ void 	server::Check_admin(int i)
 		return ;
 	}
 	std::string message;
-	std::map<int, Client>::iterator it = myClient.begin();
-	message = RED;
-	message.append("Your IRC server administrator's nickname is ");
-	message.append(it->second.getNick());
-	message.append("\n> ");
-	message.append(ED);
+	// std::map<int, Client>::iterator it = myClient.begin();
+	// message = RED;
+	message.append(":localhost 257 . :Your IRC server administrator's nickname is \r\n");
+	// message.append(it->second.getNick());
+	// message.append("\n> ");
+	// message.append(ED);
 	send(fds[i].fd, message.c_str(), message.length(), 0);
 	return ;
 	
@@ -271,9 +281,10 @@ void 	server::Check_who(std::string input, int i) // add who for operators
 	std::string auterror;
 	std::string notFound;
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
-	notFound = "USER not found\n> ";
+	notFound = ":localhost 352 " + this->getNick() + " :USER not found\r\n> ";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, auterror, RED);
+		sendMsg(fds[i].fd, ":localhost 315 " + this->getNick() + " :END of /WHO list\r\n", RED);
 		return ;
 	}
 	std::string message;
@@ -310,14 +321,10 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 	sendMsg(destination_fd, message, ED);
 	sendMsg(destination_fd, "\n> ", RED);
 	sendMsg(source_fd, "Message sent !\n> ", RED);
-
-
 }
 
 
-
-
-void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax user PRVMSG on channels
+void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on channels
 {
 	std::string	message;
 	char **data;
@@ -344,6 +351,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax
 		msg.append(data[n]);
 		msg.append(" ");
 	}
+	ft_free(data);
 	msg = msg.substr(1, msg.length() - 1);
 	// std::map<std::string, Channel> channels;
 	for (it = myClient.begin(); it != myClient.end(); it++){
@@ -359,14 +367,403 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: fix message syntax
 
 void	server::Check_notice(std::string input, int i)
 {
-  (void)input;
-  (void)i;
+  	std::string	message;
+	char **data;
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myClient[fds[i].fd].getAuth()) {
+		sendMsg(fds[i].fd, auterror, RED);
+		return ;
+	}
+	message = "NOTICE: Syntax Error\n> ";
+	input = input.substr(7, input.length());
+	data = ft_split(input.c_str(), ' ');
+	if (lenArr(data) < 2 || data[1][0] != ':') 
+	{
+		ft_free(data);
+		sendMsg(fds[i].fd, message, RED);
+		return ;
+	}
+	std::map<int, Client>::iterator it;
+	std::string destination = data[0];
+	std::string msg;
+	int n = 0;
+	while(data[++n])
+	{
+		msg.append(data[n]);
+		msg.append(" ");
+	}
+	ft_free(data);
+	msg = msg.substr(1, msg.length() - 1);
+	// std::map<std::string, Channel> channels;
+	for (it = myClient.begin(); it != myClient.end(); it++){
+	if (it->second.getNick() == destination)
+	{
+		std::string prefix = " Notice from ";
+		prefix.append(myClient[fds[i].fd].getNick());
+		prefix.append(":\t");
+		sendMsg(it->first, printTime(), GRAY);
+		sendMsg(it->first, prefix, RED);
+		sendMsg(it->first, msg, ED);
+		sendMsg(it->first, "\n> ", RED);
+		sendMsg(fds[i].fd, "Notice sent !\n> ", RED);
+	}
+			
+	}
+	sendMsg(fds[i].fd, "Destination not found!! \n> ", RED);
 
+}
+
+
+// void 	server::Check_dcc(std::string input, int i)
+// {
+// 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+// 	if (!myClient[fds[i].fd].getAuth()) {
+// 		sendMsg(fds[i].fd, auterror, RED);
+// 		return ;
+// 	}
+// 	std::string	message = "DCC: NOT SUPPORTED!!\n> ";
+// 	input = input.substr(4, input.length() - 4);
+// 	if (!input.compare(0, 4, "SEND") && input.length() > 4)
+// 		dcc_send(input, i);
+// 	else if (!input.compare(0, 6, "ACCEPT") && input.length() > 6)
+// 		dcc_accept(input, i);
+// 	else if (!input.compare(0, 6, "REJECT") && input.length() > 6)
+// 		dcc_reject(input, i);
+// 	else
+// 		sendMsg(fds[i].fd, message, RED);
+
+// }
+
+void server::joinToChannel(std::string name, int fd)
+{
+	std::cout << "fd is : " << fd << std::endl;
+	std::string message = "hola in channel name's ";
+	message.append(name);
+	message.append("\n");
+	sendMsg(fds[fd].fd, message, GREEN);
+	int i = 0;
+	std::map<int, Client>::iterator it;
+	std::map<std::string, Channel>::iterator itChann;
+	Client cl1;
+	for (it = myClient.begin(); it != myClient.end(); it++)
+	{
+		if (it->first == fds[fd].fd)
+		{
+			cl1 = it->second;
+			std::cout << " client is : " << cl1.getNick()<< std::endl;
+			break;
+		}
+	}
+	for(itChann = channels.begin(); itChann != channels.end(); itChann++)
+	{
+		if (itChann->second.getName() == name)
+			break;
+	}
+	for (it = itChann->second.usersChann.begin() ; it != itChann->second.usersChann.end(); it++)
+	{
+		if (fd == it->first)
+		{
+			i = 1;
+			break;
+		}
+	}
+	std::cout <<"jkldsjkldsjfkldsj" << std::endl;
+	cl1.setJoinChan(true);
+	// 	it->second.setJoinChan(true);
+	if (i == 0)
+	{
+		itChann->second.modes.insert(std::pair<int, std::string>(fds[fd].fd, "-a+r+w-b-o+i"));
+		itChann->second.usersChann.insert(std::pair<int, Client>(fds[fd].fd, cl1));
+	}
+	it = itChann->second.usersChann.find(fds[fd].fd);
+	if (it != itChann->second.usersChann.end())
+	{
+		it->second.setJoinChan(true);
+	}
+	// cl1.setJoinChan(true);
+	itChann->second.usersAcitve.insert(std::pair<int, Client>(fds[fd].fd, it->second));
+	// std::cout << "hola in channel name's: " << name << "and fd is : " << fd <<std::endl;
+	message = "hola in channel name's ";
+	message.append(name);
+	message.append(" and fd is: ");
+	message.append("\n");
+	sendMsg(fds[fd].fd, message , GREEN);
+}
+
+void server::createChannel(std::string name, int chec, int fd)
+{
+	// std::map<int, Channel>::iterator it;
+	if (chec == 0)
+	{
+			Channel c1 = Channel(name, "public", "nopass");
+			std::map<int, Client>::iterator it;
+			c1.modes.insert(std::pair<int, std::string>(fds[fd].fd, "all"));
+			channels.insert(std::pair<std::string, Channel>(name, c1));
+			joinToChannel(name, fd);
+	}
+	else
+	{
+		std::string message;
+		char **chan = ft_split(name.c_str(), ' ');
+		if (!chan[1])
+		{
+			ft_free(chan);
+			message = "Wrong password\n";
+			sendMsg(fds[i].fd, message, RED);
+			/// *************************************************** USE ft_free **********************************************************
+			return ;
+		}
+		name = chan[0];
+		std::string pas = chan[1];
+		Channel c1 = Channel(name, "private", pas);
+		std::string type = "private";
+		pas = chan[1];
+		ft_free(chan);
+		c1.setType(type);
+		std::string modess = "all";
+		c1.modes.insert(std::pair<int, std::string>(fds[fd].fd, modess));
+		channels.insert(std::pair<std::string, Channel>(name, c1));
+		joinToChannel(name, fd);
+		/// *************************************************** USE ft_free **********************************************************
+	}
+
+}
+
+void server::Check_join(std::string join, int fd)
+{
+	int checker = 0;
+	char **chan = ft_split(join.c_str(), ' ');
+	std::string name = chan[1], message;
+	std::map<std::string , Channel>::iterator it;
+	if (chan[1][0] != '#' && chan[1][0] != '&' && name.length() > 200)
+	{
+		/// *************************************************** USE ft_free **********************************************************
+		ft_free(chan);
+		sendMsg(fds[i].fd, "name of channel invalid", RED);
+		return ;
+	}
+	if (chan[1] && chan[1][0] == '&')
+	{
+		if (!chan[2])
+		{
+			// std::cout << "password test" <<std::endl;
+			message = "Please enter password\n";
+			sendMsg(fds[fd].fd, message, RED);
+			ft_free(chan);
+			/// *************************************************** USE ft_free **********************************************************
+			
+			return ;
+		}
+		std::string psd = chan[2];
+		std::cout << psd << std::endl;
+		std::cout << "jkldsjfklds" << psd << std::endl;
+		for (it = channels.begin(); it != channels.end(); it++)
+		{
+			std::cout << it->second.getName() << "fjdsklfjkldsfjdklsfjdkls"<< name << psd <<std::endl;
+			if (it->first == name)
+			{
+				std::cout << "youssef irc " << it->second.getPassword() << std::endl;
+				if (it->second.getPassword() == psd)
+				{
+					std::cout << "hollllllllllla" << std::endl;
+					free(chan);
+					joinToChannel(name, fd);
+					return ;
+				}
+				else
+				{
+					ft_free(chan);
+					/// *************************************************** USE ft_free **********************************************************
+					message = "Password is wrong\n";
+					sendMsg(fds[fd].fd, message, RED);
+					return ;
+				}
+			}
+			// else
+			// {
+			// }
+		}
+		checker = 1;
+		name.append(" ");
+		name.append(psd);
+	}
+	else
+	{
+		
+		for (it = channels.begin(); it != channels.end(); it++)
+		{
+			if (it->first == name)
+			{
+					ft_free(chan);
+					joinToChannel(name, fd);
+					/// *************************************************** USE ft_free **********************************************************
+					return ;
+			}
+		}
+	}
+	createChannel(name, checker, fd);
+}
+
+void server::check_users(std::string input, int fd)
+{
+	char **chan = ft_split(input.c_str(), ' ');
+	if (!chan || !chan[1])
+		return ;
+	std::string name = chan[1];
+	ft_free(chan);
+	std::map<int, Client>::iterator it;
+	std::map<int, Client>::iterator it1;
+	std::map<std::string, Channel>::iterator itChann;
+	for (itChann = channels.begin(); itChann != channels.end(); itChann++)
+	{
+		if (name == itChann->first)
+			break;
+	}
+	if (itChann == channels.end())
+	{
+		std::string message = "Channel name's " + name + "not found \n";
+		sendMsg(fds[fd].fd, message, RED);
+		return ;
+	}
+	it1 = itChann->second.usersChann.find(fds[fd].fd);
+	if (it1 == itChann->second.usersChann.end())
+	{
+		std::string message = "You are not member of channel " + name + "\n";
+		sendMsg(fds[fd].fd, message, RED);
+		return ;
+	}
+	it1 = itChann->second.usersAcitve.find(fds[fd].fd);
+	if (it1 == itChann->second.usersAcitve.end())
+	{
+		std::string message = "You are not member of channel " + name + "\n";
+		sendMsg(fds[fd].fd, message, RED);
+		return ;
+	}
+	for (it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
+	{
+		std::string message = std::to_string(it->first) + " " + it->second.getNick();
+		if (it->second.getJoinChan())
+			message += " online\n";
+		else
+			message += " offline\n";
+		sendMsg(fds[fd].fd, message, GREEN);
+	}
+}
+
+void server::check_exit_chan(std::string input, int fd)
+{
+	char **chan = ft_split(input.c_str(), ' ');
+	if (!chan && !chan[1])
+		return ;
+	std::string name = chan[1];
+	std::string message;
+	ft_free(chan);
+	std::map<int, Client>::iterator it;
+	std::map<int, Client>::iterator it1;
+	std::map<std::string, Channel>::iterator itChann;
+	
+	for (itChann = channels.begin(); itChann != channels.end(); itChann++)
+	{
+		if (name == itChann->first)
+			break;
+	}
+	if (itChann == channels.end())
+	{
+		std::string message = "Channel name's " + name + "not found \n";
+		sendMsg(fds[fd].fd, message, RED);
+		return ;
+	}
+	it1 = itChann->second.usersChann.find(fds[fd].fd);
+	if (it1 == itChann->second.usersChann.end())
+	{
+		std::string message = "You are not member in channel " + name + "\n";
+		sendMsg(fds[fd].fd, message, RED);
+		return ;
+	}
+	for(it = itChann->second.usersAcitve.begin(); it != itChann->second.usersAcitve.end(); it++)
+	{
+		if (it->first == fds[fd].fd)
+			break;
+	}
+	if (it == itChann->second.usersAcitve.end())
+	{
+		std::string message = "You are not online in channel " + name + "\n";
+		sendMsg(fds[fd].fd, message, RED);
+		return ;
+	}
+	for(it1 = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it1++)
+	{
+		if (it1->first == fds[fd].fd)
+			break;
+	}
+	it1->second.setJoinChan(false);
+	itChann->second.usersAcitve.erase(it->first);
+	message = "See you soon\n";
+	sendMsg(fds[fd].fd, message, RED);
+}
+
+void server::check_quit_chan(std::string input, int fd)
+{
+	char **chan = ft_split(input.c_str(), ' ');
+	if (!chan || !chan[1])
+		return ;
+	std::string name = chan[1];
+	ft_free(chan);
+	std::map<int, std::string>::iterator it;
+	std::map<int, Client>::iterator it1;
+	std::map<std::string, Channel>::iterator itChann;
+	std::cout << "que mera bobos que mera bobos que mera bobos" << std::endl;
+	for (itChann = channels.begin(); itChann != channels.end(); itChann++)
+	{
+		if (name == itChann->first)
+			break;
+	}
+	if (itChann == channels.end())
+	{
+		std::string message = "Channel name's " + name + "not found \n";
+		sendMsg(fds[fd].fd, message, RED);
+		return ;
+	}
+	int i = 0;
+	for (it = itChann->second.modes.begin(); it != itChann->second.modes.end(); it++)
+	{
+		if (it->second == "all")
+			i++;
+	}
+	if (i == 1)
+	{
+		for (it1 = itChann->second.usersChann.begin(); it1 != itChann->second.usersChann.end(); it1++)
+		{
+			if (it1->first == fds[fd].fd)
+				break ;
+		}
+		if (it1 == itChann->second.usersChann.end())
+		{
+			std::cout << "You are not exist in channel members" << std::endl;
+			return ;
+		}
+		it1++;
+		it = itChann->second.modes.find(it1->first);
+		if (it != itChann->second.modes.end())
+			it->second = "all";
+	}
+	itChann->second.modes.erase(fds[fd].fd);
+	itChann->second.usersChann.erase(fds[fd].fd);
+	// it1->second.setJoinChan(false);
+	it1 = itChann->second.usersAcitve.find(fd);
+	if (it1 != itChann->second.usersAcitve.end())
+		itChann->second.usersAcitve.erase(fd);
+	if (itChann->second.usersChann.size() == 0)
+		channels.erase(itChann->first);
+	std::string message = "You are now leave this channel\n";
+	sendMsg(fds[fd].fd, message, RED);
 }
 
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
+	std::cout << input << std::endl;
+
 	message = "Input not supported\n> ";
 	if (!input.compare(0, 4, "PASS") && input.length() > 4)
 		Check_pass(input, password, i);
@@ -386,8 +783,18 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_privmsg(input, i);
 	else if (!(input.compare(0, 6, "NOTICE")) && input.length() > 6)
 		Check_notice(input, i);
+	// else if (!(input.compare(0, 3, "DCC")) && input.length() > 3)
+	// 	Check_dcc(input, i);
 	else if (!(input.compare(0, 4, "/BOT")) && input.length() > 4)
 		CreateBot(myClient, input, fds[i].fd);
+	else if (!(input.compare(0, 4, "JOIN")))
+		Check_join(input, i);
+	else if (!(input.compare(0, 10, "LISTUSERCH")))
+		check_users(input, i);
+	else if (!(input.compare(0, 6, "EXITCH")))
+		check_exit_chan(input, i);
+	else if (!(input.compare(0 , 6, "CHQUIT")))
+		check_quit_chan(input, i);
 	else
 		sendMsg(fds[i].fd, message, RED);
 }
