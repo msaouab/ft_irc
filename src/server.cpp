@@ -120,12 +120,12 @@ int	server::acceptSocket(int n_fds)
 			}
 			break ;
 		}
-		std::string welcome = _welcomemsg(new_sd);
+		// std::string welcome = _welcomemsg(new_sd);
 		std::cout << "New incomming connection ==> " << new_sd << std::endl;
 		ip_addr = inet_ntoa(address.sin_addr);
 		myGuest[new_sd].setIP(ip_addr);
-		if (send(new_sd, welcome.c_str(), welcome.length(), 0) <= 0)
-			std::cout << strerror(errno);
+		// if (send(new_sd, welcome.c_str(), welcome.length(), 0) <= 0)
+		// 	std::cout << strerror(errno);
 		fds[n_fds].fd = new_sd;
 		fds[n_fds].events = POLLIN;
 		n_fds++;
@@ -209,6 +209,9 @@ void	server::Check_user(std::string user, int i)
 		myClient[fds[i].fd] = myGuest[fds[i].fd];
 		myGuest[fds[i].fd].setLog(true);
 	}
+	std::string welcome = _welcomemsg(fds[i].fd);
+	send(fds[i].fd,welcome.c_str(), welcome.length(), 0);
+
 	ft_free(userArr);
 }
 
@@ -244,7 +247,7 @@ void 	server::Check_admin(int i)
 	std::string message;
 	// std::map<int, Client>::iterator it = myClient.begin();
 	// message = RED;
-	message.append(":localhost 257 . :Your IRC server administrator's nickname is \r\n");
+	message.append(": 256 . :Your IRC server administrator's nickname is \r\n");
 	// message.append(it->second.getNick());
 	// message.append("\n> ");
 	// message.append(ED);
@@ -271,9 +274,9 @@ std::string printTime(void)
 
 void server::Check_time(int i)
 {
-	std::string p = "Today is";
+	std::string p = "391 . :Today is ";
 	p.append(printTime());
-	sendMsg(fds[i].fd, p, RED);
+	send(fds[i].fd, p.c_str(), p.length(), 0);
 }
 
 void 	server::Check_who(std::string input, int i) // add who for operators
@@ -326,6 +329,7 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 
 void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on channels
 {
+	std::string syntax = ":" + myClient[fds[i].fd].getNick()+ " " + input + "\n";
 	std::string	message;
 	char **data;
 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
@@ -333,7 +337,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 		sendMsg(fds[i].fd, auterror, RED);
 		return ;
 	}
-	message = "PRIVMSG: Syntax Error\n> ";
+	message = "412 ERR_NOTEXTTOSEND :No text to send\n> ";
 	input = input.substr(8, input.length());
 	data = ft_split(input.c_str(), ' ');
 	if (lenArr(data) < 2) 
@@ -357,7 +361,8 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	for (it = myClient.begin(); it != myClient.end(); it++){
 		if (it->second.getNick() == destination)
 		{
-			single_prvmsg(fds[i].fd, it->first, myClient[fds[i].fd].getNick(), msg);
+			send(it->first, syntax.c_str(), syntax.length(), 0);
+			std::cout << syntax << std::endl;
 			return ;
 		}
 			
@@ -373,7 +378,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 			return ;
 		}
 	}
-	sendMsg(fds[i].fd, "Destination not found!! \n> ", RED);
+	sendMsg(fds[i].fd, ":localhost 401 ERR_NOSUCHNICK :channel\r\n> ", RED);
 }
 
 void	server::Check_notice(std::string input, int i)
