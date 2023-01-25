@@ -13,7 +13,7 @@
 //     char ** send = ft_split(input.c_str(), ' ');
 // 	if (lenArr(send)  != 3) {
 // 		ft_free(send);
-// 		std::string message = "DCC: SEND: Parameters: <filename> <host> <port>.\n> ";
+// 		std::string message = "DCC: SEND: Parameters: <filename> <host> <port>.\n";
 // 		sendMsg(fds[i].fd, message, RED);
 // 		return ;
 // 	}
@@ -23,7 +23,7 @@
 //     ft_free(send);
 //     if (std::stoi(dcc_port,0,10) == this->getPort() || std::stoi(dcc_port,0,10) < 1025)
 //     {
-//         sendMsg(fds[i].fd, "DCC: SEND: WRONG PORT NUMBER\n> ", RED);
+//         sendMsg(fds[i].fd, "DCC: SEND: WRONG PORT NUMBER\n", RED);
 // 		return ;
 //     }
 //     std::map<int, Client>::iterator it;

@@ -33,7 +33,6 @@ std::string	server::_welcomemsg(int fd)
 	welcome.append("004 . :Command: `USER ` Your username in the server \n");
 	welcome.append(ED);
 	welcome.append(RED);
-	welcome.append("> ");
 	welcome.append(ED);
 	// welcome.append("\r\n");
 	return (welcome);
@@ -45,5 +44,7 @@ void	sendMsg(int fd, std::string msg, std::string color)
 	message = color;
 	message.append(msg);
 	message.append(ED);
-	send(fd, message.c_str(), message.length(), 0);
+	size_t i = 0;
+	while (i != message.length())
+		i += send(fd, message.c_str(), message.length() - i, 0);
 }

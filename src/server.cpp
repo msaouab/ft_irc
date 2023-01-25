@@ -137,7 +137,7 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 {
 	std::string message;
 	pass = pass.substr(5, pass.length());
-	message = "Incorrect Password\n> ";
+	message = "Incorrect Password\n";
 	if(pass != password) 
 	{
 		myGuest[fds[i].fd].setAuth(false);
@@ -152,8 +152,8 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 void	server::Check_nick(std::string nick, int i)
 {
 	std::string	message;
-	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
-	std::string hash = "Please remove #/$ from your name\n>";
+	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	std::string hash = "Please remove #/$ from your name\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, message, RED);
 		return ;
@@ -163,7 +163,7 @@ void	server::Check_nick(std::string nick, int i)
 		sendMsg(fds[i].fd, hash, RED);
 		return ;
 	}
-	message = "this nickname already exist\n> ";
+	message = "this nickname already exist\n";
 	nick = nick.substr(5, nick.length());
 	std::map<int, Client>::iterator it;
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
@@ -183,7 +183,7 @@ void	server::Check_user(std::string user, int i)
 {
 	char	**userArr;
 	std::string	message;
-	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n>";
+	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, message, RED);
@@ -198,7 +198,7 @@ void	server::Check_user(std::string user, int i)
 	userArr = ft_split(user.c_str(), ' ');
 	if (lenArr(userArr) < 4) {
 		ft_free(userArr);
-		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n>";
+		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n";
 		sendMsg(fds[i].fd, message, RED);
 		return ;
 	}
@@ -209,8 +209,8 @@ void	server::Check_user(std::string user, int i)
 		myClient[fds[i].fd] = myGuest[fds[i].fd];
 		myGuest[fds[i].fd].setLog(true);
 	}
-	std::string welcome = _welcomemsg(fds[i].fd);
-	send(fds[i].fd,welcome.c_str(), welcome.length(), 0);
+	// std::string welcome = _welcomemsg(fds[i].fd);
+	// send(fds[i].fd,welcome.c_str(), welcome.length(), 0);
 
 	ft_free(userArr);
 }
@@ -239,7 +239,7 @@ void	server::Check_quit(int i)
 void 	server::Check_admin(int i)
 {
 	std::string auterror;
-	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, auterror, RED);
 		return ;
@@ -249,7 +249,7 @@ void 	server::Check_admin(int i)
 	// message = RED;
 	message.append(": 256 . :Your IRC server administrator's nickname is \r\n");
 	// message.append(it->second.getNick());
-	// message.append("\n> ");
+	// message.append("\n");
 	// message.append(ED);
 	send(fds[i].fd, message.c_str(), message.length(), 0);
 	return ;
@@ -267,14 +267,13 @@ std::string printTime(void)
 	time = tv.tv_sec;
 	info = localtime(&time);
 	_time.append(asctime(info));
-	_time.append("> ");
 	return(_time);
 }
 
 
 void server::Check_time(int i)
 {
-	std::string p = "391 . :Today is ";
+	std::string p = ":391 . :Today is ";
 	p.append(printTime());
 	send(fds[i].fd, p.c_str(), p.length(), 0);
 }
@@ -283,8 +282,8 @@ void 	server::Check_who(std::string input, int i) // add who for operators
 {
 	std::string auterror;
 	std::string notFound;
-	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
-	notFound = ":localhost 352 " + this->getNick() + " :USER not found\r\n> ";
+	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
+	notFound = ":localhost 352 " + this->getNick() + " :USER not found\r\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, auterror, RED);
 		sendMsg(fds[i].fd, ":localhost 315 " + this->getNick() + " :END of /WHO list\r\n", RED);
@@ -304,7 +303,7 @@ void 	server::Check_who(std::string input, int i) // add who for operators
 			message.append(" And the real name is ");
 			message.append(it->second.getRealname());
 			send(fds[i].fd, message.c_str(), message.length(), 0);
-			message = "\n> ";
+			message = "\n";
 			message.append(ED);
 			send(fds[i].fd, message.c_str(), message.length(), 0);
 			return ;
@@ -322,22 +321,22 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 	sendMsg(destination_fd, printTime(), GRAY);
 	sendMsg(destination_fd, prefix, RED);
 	sendMsg(destination_fd, message, ED);
-	sendMsg(destination_fd, "\n> ", RED);
-	sendMsg(source_fd, "Message sent !\n> ", RED);
+	sendMsg(destination_fd, "\n", RED);
+	sendMsg(source_fd, "Message sent !\n", RED);
 }
 
 
 void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on channels
 {
-	std::string syntax = ":" + myClient[fds[i].fd].getNick()+ " " + input + "\n";
+	std::string syntax = ":" + myClient[fds[i].fd].getNick() + " " + input + "\n";
 	std::string	message;
 	char **data;
-	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, auterror, RED);
 		return ;
 	}
-	message = "412 ERR_NOTEXTTOSEND :No text to send\n> ";
+	message = "412 ERR_NOTEXTTOSEND :No text to send\n";
 	input = input.substr(8, input.length());
 	data = ft_split(input.c_str(), ' ');
 	if (lenArr(data) < 2) 
@@ -361,7 +360,10 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	for (it = myClient.begin(); it != myClient.end(); it++){
 		if (it->second.getNick() == destination)
 		{
-			send(it->first, syntax.c_str(), syntax.length(), 0);
+			size_t i = 0;
+			while (i != syntax.length())
+				i +=send(it->first, syntax.c_str(), syntax.length() - i, 0);
+			std::cout << i << " " << syntax.length() << std::endl;
 			std::cout << syntax << std::endl;
 			return ;
 		}
@@ -378,19 +380,19 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 			return ;
 		}
 	}
-	sendMsg(fds[i].fd, ":localhost 401 ERR_NOSUCHNICK :channel\r\n> ", RED);
+	sendMsg(fds[i].fd, ":localhost 401 ERR_NOSUCHNICK :channel\r\n", RED);
 }
 
 void	server::Check_notice(std::string input, int i)
 {
   	std::string	message;
 	char **data;
-	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, auterror, RED);
 		return ;
 	}
-	message = "NOTICE: Syntax Error\n> ";
+	message = "NOTICE: Syntax Error\n";
 	input = input.substr(7, input.length());
 	data = ft_split(input.c_str(), ' ');
 	if (lenArr(data) < 2 || data[1][0] != ':') 
@@ -421,24 +423,24 @@ void	server::Check_notice(std::string input, int i)
 			sendMsg(it->first, printTime(), GRAY);
 			sendMsg(it->first, prefix, RED);
 			sendMsg(it->first, msg, ED);
-			sendMsg(it->first, "\n> ", RED);
-			sendMsg(fds[i].fd, "Notice sent !\n> ", RED);
+			sendMsg(it->first, "\n", RED);
+			sendMsg(fds[i].fd, "Notice sent !\n", RED);
 		}
 			
 	}
-	sendMsg(fds[i].fd, "Destination not found!! \n> ", RED);
+	sendMsg(fds[i].fd, "Destination not found!! \n", RED);
 
 }
 
 
 // void 	server::Check_dcc(std::string input, int i)
 // {
-// 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+// 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 // 	if (!myClient[fds[i].fd].getAuth()) {
 // 		sendMsg(fds[i].fd, auterror, RED);
 // 		return ;
 // 	}
-// 	std::string	message = "DCC: NOT SUPPORTED!!\n> ";
+// 	std::string	message = "DCC: NOT SUPPORTED!!\n";
 // 	input = input.substr(4, input.length() - 4);
 // 	if (!input.compare(0, 4, "SEND") && input.length() > 4)
 // 		dcc_send(input, i);
@@ -456,7 +458,7 @@ void server::joinToChannel(std::string name, int fd)
 	std::cout << "fd is : " << fd << std::endl;
 	std::string message = "hola in channel name's ";
 	message.append(name);
-	message.append("\n> ");
+	message.append("\n");
 	sendMsg(fds[fd].fd, message, GREEN);
 	int i = 0;
 	std::map<int, Client>::iterator it;
@@ -503,7 +505,7 @@ void server::joinToChannel(std::string name, int fd)
 	message = "hola in channel name's ";
 	message.append(name);
 	message.append(" and fd is: ");
-	message.append("\n> ");
+	message.append("\n");
 	sendMsg(fds[fd].fd, message , GREEN);
 }
 
@@ -525,7 +527,7 @@ void server::createChannel(std::string name, int chec, int fd)
 		if (!chan[1])
 		{
 			ft_free(chan);
-			message = "Wrong password\n> ";
+			message = "Wrong password\n";
 			sendMsg(fds[i].fd, message, RED);
 			/// *************************************************** USE ft_free **********************************************************
 			return ;
@@ -591,7 +593,7 @@ void server::Check_join(std::string join, int fd)
 				{
 					ft_free(chan);
 					/// *************************************************** USE ft_free **********************************************************
-					message = "Password is wrong\n> ";
+					message = "Password is wrong\n";
 					sendMsg(fds[fd].fd, message, RED);
 					return ;
 				}
@@ -781,7 +783,7 @@ void	server::Parse_cmd(std::string input, int i)
 	std::string	message;
 	std::cout << input << std::endl;
 
-	message = "Input not supported\n> ";
+	message = "Input not supported\n";
 	if (!input.compare(0, 4, "PASS") && input.length() > 4)
 		Check_pass(input, password, i);
 	else if (!(input.compare(0, 4, "NICK")) && input.length() > 4)
@@ -822,6 +824,7 @@ bool	server::recvMessage(int i)
 	std::string	input;
 	
 	rc = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
+	std::cout << "buff : " << buffer << std::endl;
 	if (rc < 0) {
 		if (errno != EWOULDBLOCK) {
 			std::cout << "recv() failed: " << strerror(errno) << std::endl;
@@ -868,8 +871,6 @@ void	server::start()
 			else {
 				std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
 				st_conx = false;
-				std::string redr = "> ";
-				sendMsg(fds[i].fd, redr, RED);
 				recvMessage(i);
 				// while (true) {
 				// 	if (recvMessage(i) == false)
