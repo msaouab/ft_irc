@@ -784,7 +784,7 @@ void	server::Parse_cmd(std::string input, int i)
 	std::string	message;
 	std::cout << input << std::endl;
 
-	message = "Input not supported\n";
+	message = ":localhost 421 " + myClient[fds[i].fd].getNick() + " " + input + " :Unknown command\n";
 	if (!input.compare(0, 4, "PASS") && input.length() > 4)
 		Check_pass(input, password, i);
 	else if (!(input.compare(0, 4, "NICK")) && input.length() > 4)
