@@ -290,35 +290,25 @@ void server::Check_time(int i)
 void 	server::Check_who(std::string input, int i) // add who for operators
 {
 	std::string auterror;
-	std::string notFound;
+	std::string start,end;
+	input = input.substr(4, input.length() - 4);
+	std::map<int, Client>::iterator it;
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
-	notFound = ":localhost 352 " + this->getNick() + " :USER not found\r\n";
+	end = ":localhost 315 " + myClient[fds[i].fd].getNick() + " " + input + " :END of /WHO list.\r\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, auterror);
-		sendMsg(fds[i].fd, ":localhost 315 " + this->getNick() + " :END of /WHO list\r\n");
 		return ;
 	}
-	std::string message;
-	std::map<int, Client>::iterator it;
-	input = input.substr(4, input.length() - 4);
 	for (it = myClient.begin(); it != myClient.end(); it++) {
 		if (it->second.getNick() == input)
 		{
-			message = YELLOW;
-			message.append("WHO request: Nickname ");
-			message.append(it->second.getNick());
-			message.append(" Username ");
-			message.append(it->second.getUser());
-			message.append(" And the real name is ");
-			message.append(it->second.getRealname());
-			send(fds[i].fd, message.c_str(), message.length(), 0);
-			message = "\n";
-			message.append(ED);
-			send(fds[i].fd, message.c_str(), message.length(), 0);
+			start = ":localhost 325 " + myClient[fds[i].fd].getNick() + " * ~" + it->second.getUser() + " " + it->second.getIP()\
+			+ " localhost " + myClient[fds[i].fd].getNick() + " H:0 " + it->second.getRealname() + ".\n";
+			sendMsg(fds[i].fd, start.append(end));
 			return ;
 		}
 	}
-	sendMsg(fds[i].fd, notFound);
+	sendMsg(fds[i].fd, end);
 	return ;
 }
 
