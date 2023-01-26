@@ -141,7 +141,7 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 	if(pass != password) 
 	{
 		myGuest[fds[i].fd].setAuth(false);
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
     }
 		std::cout << "Fd in pass " << fds[i].fd << std::endl;
@@ -155,12 +155,12 @@ void	server::Check_nick(std::string nick, int i)
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	std::string hash = "Please remove #/$ from your name\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	if(std::count(nick.begin(), nick.end(), '#') || std::count(nick.begin(), nick.end(), '&'))
 	{
-		sendMsg(fds[i].fd, hash, RED);
+		sendMsg(fds[i].fd, hash);
 		return ;
 	}
 	message = "this nickname already exist\n";
@@ -168,7 +168,7 @@ void	server::Check_nick(std::string nick, int i)
 	std::map<int, Client>::iterator it;
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
 		if (it->second.getNick() == nick) {
-			sendMsg(fds[i].fd, message, RED);
+			sendMsg(fds[i].fd, message);
 			return ;
 		}
 	}
@@ -186,12 +186,12 @@ void	server::Check_user(std::string user, int i)
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	message = "Please enter your NICK before USER :)\n";
 	if (myGuest[fds[i].fd].getNick() == "") {
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	user = user.substr(5, user.length());
@@ -199,7 +199,7 @@ void	server::Check_user(std::string user, int i)
 	if (lenArr(userArr) < 4) {
 		ft_free(userArr);
 		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n";
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	myGuest[fds[i].fd].setUser(userArr[0]);
@@ -219,7 +219,7 @@ void	server::Check_quit(int i)
 {
 	std::string	message;
 	message = "You are leaving the server.\nsee you later :)\n";
-	sendMsg(fds[i].fd, message, GREEN);
+	sendMsg(fds[i].fd, message);
 	myGuest.erase(fds[i].fd);
 	myClient.erase(fds[i].fd);
 	std::map<int, Client>::iterator it;
@@ -240,18 +240,18 @@ void 	server::Check_admin(int i)
 {
 	std::string auterror;
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
-	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
+	if (!myClient[fds[i].fd].getAuth()) {
+		sendMsg(fds[i].fd, auterror);
 		return ;
 	}
-	std::string message;
-	// std::map<int, Client>::iterator it = myClient.begin();
-	// message = RED;
-	message.append(": 256 . :Your IRC server administrator's nickname is \r\n");
-	// message.append(it->second.getNick());
-	// message.append("\n");
-	// message.append(ED);
-	send(fds[i].fd, message.c_str(), message.length(), 0);
+	std::map<int, Client>::iterator it = myClient.begin();
+	std::string message1,message2,message3,message4;
+	message1.append(":localhost 256 " + myClient[fds[i].fd].getNick() + " :Administrative info about localhost\n");
+	// sendMsg(fds[i].fd,message1);
+	message2 = ":localhost 257 " + myClient[fds[i].fd].getNick() + " :" + it->second.getNick() + " is in Khouribga, Morocco\n";
+	message2 = ":localhost 257 " + myClient[fds[i].fd].getNick() + " :" + it->second.getNick() + " is in Khouribga, Morocco\n";
+	message1 = message1.append(message2);
+	sendMsg(fds[i].fd,message1);
 	return ;
 	
 }
@@ -294,8 +294,8 @@ void 	server::Check_who(std::string input, int i) // add who for operators
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	notFound = ":localhost 352 " + this->getNick() + " :USER not found\r\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
-		sendMsg(fds[i].fd, ":localhost 315 " + this->getNick() + " :END of /WHO list\r\n", RED);
+		sendMsg(fds[i].fd, auterror);
+		sendMsg(fds[i].fd, ":localhost 315 " + this->getNick() + " :END of /WHO list\r\n");
 		return ;
 	}
 	std::string message;
@@ -318,7 +318,7 @@ void 	server::Check_who(std::string input, int i) // add who for operators
 			return ;
 		}
 	}
-	sendMsg(fds[i].fd, notFound, RED);
+	sendMsg(fds[i].fd, notFound);
 	return ;
 }
 
@@ -327,11 +327,11 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 	std::string prefix = " Message from ";
 	prefix.append(source);
 	prefix.append(" ");
-	sendMsg(destination_fd, printTime(), GRAY);
-	sendMsg(destination_fd, prefix, RED);
-	sendMsg(destination_fd, message, ED);
-	sendMsg(destination_fd, "\n", RED);
-	sendMsg(source_fd, "Message sent !\n", RED);
+	sendMsg(destination_fd, printTime());
+	sendMsg(destination_fd, prefix);
+	sendMsg(destination_fd, message);
+	sendMsg(destination_fd, "\n");
+	sendMsg(source_fd, "Message sent !\n");
 }
 
 
@@ -342,7 +342,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	char **data;
 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
+		sendMsg(fds[i].fd, auterror);
 		return ;
 	}
 	message = "412 ERR_NOTEXTTOSEND :No text to send\n";
@@ -351,7 +351,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	if (lenArr(data) < 2) 
 	{
 		ft_free(data);
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	std::map<int, Client>::iterator it;
@@ -391,7 +391,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 			return ;
 		}
 	}
-	sendMsg(fds[i].fd, ":localhost 401 ERR_NOSUCHNICK :channel\r\n", RED);
+	sendMsg(fds[i].fd, ":localhost 401 ERR_NOSUCHNICK :channel\r\n");
 }
 
 void	server::Check_notice(std::string input, int i)
@@ -400,7 +400,7 @@ void	server::Check_notice(std::string input, int i)
 	char **data;
 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
+		sendMsg(fds[i].fd, auterror);
 		return ;
 	}
 	message = "NOTICE: Syntax Error\n";
@@ -409,7 +409,7 @@ void	server::Check_notice(std::string input, int i)
 	if (lenArr(data) < 2 || data[1][0] != ':') 
 	{
 		ft_free(data);
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	std::map<int, Client>::iterator it;
@@ -431,15 +431,15 @@ void	server::Check_notice(std::string input, int i)
 			std::string prefix = " Notice from ";
 			prefix.append(myClient[fds[i].fd].getNick());
 			prefix.append(":\t");
-			sendMsg(it->first, printTime(), GRAY);
-			sendMsg(it->first, prefix, RED);
-			sendMsg(it->first, msg, ED);
-			sendMsg(it->first, "\n", RED);
-			sendMsg(fds[i].fd, "Notice sent !\n", RED);
+			sendMsg(it->first, printTime());
+			sendMsg(it->first, prefix);
+			sendMsg(it->first, msg);
+			sendMsg(it->first, "\n");
+			sendMsg(fds[i].fd, "Notice sent !\n");
 		}
 			
 	}
-	sendMsg(fds[i].fd, "Destination not found!! \n", RED);
+	sendMsg(fds[i].fd, "Destination not found!! \n");
 
 }
 
@@ -448,7 +448,7 @@ void	server::Check_notice(std::string input, int i)
 // {
 // 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 // 	if (!myClient[fds[i].fd].getAuth()) {
-// 		sendMsg(fds[i].fd, auterror, RED);
+// 		sendMsg(fds[i].fd, auterror);
 // 		return ;
 // 	}
 // 	std::string	message = "DCC: NOT SUPPORTED!!\n";
@@ -460,7 +460,7 @@ void	server::Check_notice(std::string input, int i)
 // 	else if (!input.compare(0, 6, "REJECT") && input.length() > 6)
 // 		dcc_reject(input, i);
 // 	else
-// 		sendMsg(fds[i].fd, message, RED);
+// 		sendMsg(fds[i].fd, message);
 
 // }
 
@@ -470,7 +470,7 @@ void server::joinToChannel(std::string name, int fd)
 	std::string message = "hola in channel name's ";
 	message.append(name);
 	message.append("\n");
-	sendMsg(fds[fd].fd, message, GREEN);
+	sendMsg(fds[fd].fd, message);
 	int i = 0;
 	std::map<int, Client>::iterator it;
 	std::map<std::string, Channel>::iterator itChann;
@@ -517,7 +517,7 @@ void server::joinToChannel(std::string name, int fd)
 	message.append(name);
 	message.append(" and fd is: ");
 	message.append("\n");
-	sendMsg(fds[fd].fd, message , GREEN);
+	sendMsg(fds[fd].fd, message );
 }
 
 void server::createChannel(std::string name, int chec, int fd)
@@ -539,7 +539,7 @@ void server::createChannel(std::string name, int chec, int fd)
 		{
 			ft_free(chan);
 			message = "Wrong password\n";
-			sendMsg(fds[i].fd, message, RED);
+			sendMsg(fds[i].fd, message);
 			/// *************************************************** USE ft_free **********************************************************
 			return ;
 		}
@@ -569,7 +569,7 @@ void server::Check_join(std::string join, int fd)
 	{
 		/// *************************************************** USE ft_free **********************************************************
 		ft_free(chan);
-		sendMsg(fds[i].fd, "name of channel invalid", RED);
+		sendMsg(fds[i].fd, "name of channel invalid");
 		return ;
 	}
 	if (chan[1] && chan[1][0] == '&')
@@ -578,7 +578,7 @@ void server::Check_join(std::string join, int fd)
 		{
 			// std::cout << "password test" <<std::endl;
 			message = "Please enter password\n";
-			sendMsg(fds[fd].fd, message, RED);
+			sendMsg(fds[fd].fd, message);
 			ft_free(chan);
 			/// *************************************************** USE ft_free **********************************************************
 			
@@ -605,7 +605,7 @@ void server::Check_join(std::string join, int fd)
 					ft_free(chan);
 					/// *************************************************** USE ft_free **********************************************************
 					message = "Password is wrong\n";
-					sendMsg(fds[fd].fd, message, RED);
+					sendMsg(fds[fd].fd, message);
 					return ;
 				}
 			}
@@ -652,21 +652,21 @@ void server::check_users(std::string input, int fd)
 	if (itChann == channels.end())
 	{
 		std::string message = "Channel name's " + name + "not found \n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	it1 = itChann->second.usersChann.find(fds[fd].fd);
 	if (it1 == itChann->second.usersChann.end())
 	{
 		std::string message = "You are not member of channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	it1 = itChann->second.usersAcitve.find(fds[fd].fd);
 	if (it1 == itChann->second.usersAcitve.end())
 	{
 		std::string message = "You are not member of channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	for (it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
@@ -676,7 +676,7 @@ void server::check_users(std::string input, int fd)
 			message += " online\n";
 		else
 			message += " offline\n";
-		sendMsg(fds[fd].fd, message, GREEN);
+		sendMsg(fds[fd].fd, message);
 	}
 }
 
@@ -700,14 +700,14 @@ void server::check_exit_chan(std::string input, int fd)
 	if (itChann == channels.end())
 	{
 		std::string message = "Channel name's " + name + "not found \n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	it1 = itChann->second.usersChann.find(fds[fd].fd);
 	if (it1 == itChann->second.usersChann.end())
 	{
 		std::string message = "You are not member in channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	for(it = itChann->second.usersAcitve.begin(); it != itChann->second.usersAcitve.end(); it++)
@@ -718,7 +718,7 @@ void server::check_exit_chan(std::string input, int fd)
 	if (it == itChann->second.usersAcitve.end())
 	{
 		std::string message = "You are not online in channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	for(it1 = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it1++)
@@ -729,7 +729,7 @@ void server::check_exit_chan(std::string input, int fd)
 	it1->second.setJoinChan(false);
 	itChann->second.usersAcitve.erase(it->first);
 	message = "See you soon\n";
-	sendMsg(fds[fd].fd, message, RED);
+	sendMsg(fds[fd].fd, message);
 }
 
 void server::check_quit_chan(std::string input, int fd)
@@ -751,7 +751,7 @@ void server::check_quit_chan(std::string input, int fd)
 	if (itChann == channels.end())
 	{
 		std::string message = "Channel name's " + name + "not found \n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	int i = 0;
@@ -786,7 +786,7 @@ void server::check_quit_chan(std::string input, int fd)
 	if (itChann->second.usersChann.size() == 0)
 		channels.erase(itChann->first);
 	std::string message = "You are now leave this channel\n";
-	sendMsg(fds[fd].fd, message, RED);
+	sendMsg(fds[fd].fd, message);
 }
 
 void	server::Parse_cmd(std::string input, int i)
@@ -826,7 +826,7 @@ void	server::Parse_cmd(std::string input, int i)
 	else if (!(input.compare(0 , 6, "CHQUIT")))
 		check_quit_chan(input, i);
 	else
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 }
 
 bool	server::recvMessage(int i)

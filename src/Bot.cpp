@@ -36,13 +36,13 @@ void	Bot::FIND(std::map<int, Client>myClient, char *input, int fd)
 			message = "This person in <";
 			message.append(getPost(myClient[it->first].getIP()));
 			message.append(">\n");
-			sendMsg(fd, message, GREEN);
+			sendMsg(fd, message);
 			return ;
 		}
 	}
 	message = "Incorrect Nickname: ";
 	message.append(input);
-	sendMsg(fd, message, RED);
+	sendMsg(fd, message);
 }
 
 void	Bot::TIME(std::map<int, Client>myClient, char *input, int fd)
@@ -70,7 +70,7 @@ void	Bot::TIME(std::map<int, Client>myClient, char *input, int fd)
 	message.append(" <");
 	message.append(buffer);
 	message.append(">\n");
-	sendMsg(fd, message, GREEN);
+	sendMsg(fd, message);
 	std::cout << buffer << std::endl;
 }
 
@@ -88,7 +88,7 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 	// }
 	if (lenArr(userArr) != 3) {
 		ft_free(userArr);
-		sendMsg(fd, message, RED);
+		sendMsg(fd, message);
 		return ;
 	}
 	if (strcmp(userArr[1], ":find") == 0)
@@ -96,7 +96,7 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 	else if (strcmp(userArr[1], ":logtime") == 0)
 		bot.TIME(myClient, userArr[2], fd);
 	else
-		sendMsg(fd, message, RED);
+		sendMsg(fd, message);
 	ft_free(userArr);
 }
 

@@ -38,13 +38,9 @@ std::string	server::_welcomemsg(int fd)
 	return (welcome);
 }
 
-void	sendMsg(int fd, std::string msg, std::string color)
+void	sendMsg(int fd, std::string msg)
 {
-	std::string	message;
-	message = color;
-	message.append(msg);
-	message.append(ED);
 	size_t i = 0;
-	while (i != message.length())
-		i += send(fd, message.c_str(), message.length() - i, 0);
+	while (i != msg.length())
+		i += send(fd, msg.c_str(), msg.length() - i, 0);
 }
