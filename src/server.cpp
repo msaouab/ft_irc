@@ -267,15 +267,24 @@ std::string printTime(void)
 	time = tv.tv_sec;
 	info = localtime(&time);
 	_time.append(asctime(info));
+	_time.append("\n");
 	return(_time);
 }
 
 
+/*:nickname PRIVMSG <target> <msg> \r\n
+error syntax: 412 ERR_NOTEXTTOSEND :<message> \r\n
+error target: 401 ERR_NOSUCHNICK " + target + "  :<message>\r\n
+
+421 ERR_UNKNOWNCOMMAND " + <cmd> + " :<message>\r\n"*/
+
 void server::Check_time(int i)
 {
-	std::string p = ":391 . :Today is ";
+	std::string p = ":localhost 391 " + this->getNick() + " localhost :Today is ";
 	p.append(printTime());
-	send(fds[i].fd, p.c_str(), p.length(), 0);
+	size_t il = 0;
+	while (il != p.length())
+		il +=send(fds[i].fd, p.c_str(), p.length() - il, 0);
 }
 
 void 	server::Check_who(std::string input, int i) // add who for operators
@@ -358,13 +367,11 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	if(msg[0] == ':')
 		msg = msg.substr(1, msg.length() - 1);
 	for (it = myClient.begin(); it != myClient.end(); it++){
-		if (it->second.getNick() == destination)
+		if (it->second.getNick() == destination && destination != this->getNick())
 		{
 			size_t i = 0;
 			while (i != syntax.length())
 				i +=send(it->first, syntax.c_str(), syntax.length() - i, 0);
-			std::cout << i << " " << syntax.length() << std::endl;
-			std::cout << syntax << std::endl;
 			return ;
 		}
 			
@@ -373,10 +380,14 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	std::string chan_msg = GREEN + destination + " " + ED + msg;
 	for(itChann = channels.begin(); itChann != channels.end(); itChann++)
 	{
-		if (itChann->second.getName() == destination)
+		if (itChann->second.getName() == destination && destination != this->getNick())
 		{
 			for (it = itChann->second.usersChann.begin() ; it != itChann->second.usersChann.end(); it++)
-				single_prvmsg(fds[i].fd, it->first, myClient[fds[i].fd].getNick(), chan_msg);
+			{		
+					size_t i = 0;
+					while (i != syntax.length())
+					i +=send(it->first, syntax.c_str(), syntax.length() - i, 0);
+			}
 			return ;
 		}
 	}
@@ -824,7 +835,6 @@ bool	server::recvMessage(int i)
 	std::string	input;
 	
 	rc = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
-	std::cout << "buff : " << buffer << std::endl;
 	if (rc < 0) {
 		if (errno != EWOULDBLOCK) {
 			std::cout << "recv() failed: " << strerror(errno) << std::endl;
