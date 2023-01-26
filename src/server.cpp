@@ -8,6 +8,8 @@ server::server()
 }
 
 server::server(int _port, std::string _pswd) {
+	if (_port < 6665 || _port > 6669)
+		throw server::ErrorPortException();
 	this->port = _port;
 	this->password = _pswd;
 	this->n_fds = 1;
@@ -891,5 +893,5 @@ void	server::start()
 
 const char* server::ErrorPortException::what() const throw()
 {
-	return("\033[1;31m Error in Port number \033[0m");
+	return("\033[1;31m Error in Port number. The range is 6665-6669 \033[0m");
 }
