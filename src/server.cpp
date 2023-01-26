@@ -386,7 +386,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 
 void	server::Check_notice(std::string input, int i)
 {
-  	std::string	message;
+  	std::string	message,to_send;
 	char **data;
 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
@@ -394,9 +394,9 @@ void	server::Check_notice(std::string input, int i)
 		return ;
 	}
 	message = "NOTICE: Syntax Error\n";
-	input = input.substr(7, input.length());
+	input = input.substr(6, input.length());
 	data = ft_split(input.c_str(), ' ');
-	if (lenArr(data) < 2 || data[1][0] != ':') 
+	if (lenArr(data) < 2) 
 	{
 		ft_free(data);
 		sendMsg(fds[i].fd, message);
@@ -405,32 +405,30 @@ void	server::Check_notice(std::string input, int i)
 	std::map<int, Client>::iterator it;
 	std::string destination = data[0];
 	std::string msg;
-	int n = 0;
-	while(data[++n])
+	if (data[1][0] == ':')
 	{
-		msg.append(data[n]);
-		msg.append(" ");
+		int n = 0;
+		while(data[++n])
+		{
+			msg.append(data[n]);
+			msg.append(" ");
+		}
+		msg = msg.substr(1, msg.length() - 1);
 	}
+	else 
+		msg = data[1];
 	ft_free(data);
-	msg = msg.substr(1, msg.length() - 1);
-	// std::map<std::string, Channel> channels;
+	std::cout << "msg   "<< msg << std::endl;
 	for (it = myClient.begin(); it != myClient.end(); it++)
 	{
 		if (it->second.getNick() == destination)
 		{
-			std::string prefix = " Notice from ";
-			prefix.append(myClient[fds[i].fd].getNick());
-			prefix.append(":\t");
-			sendMsg(it->first, printTime());
-			sendMsg(it->first, prefix);
-			sendMsg(it->first, msg);
-			sendMsg(it->first, "\n");
-			sendMsg(fds[i].fd, "Notice sent !\n");
-		}
-			
+			to_send = ":" + myClient[fds[i].fd].getNick() + " NOTICE " + destination + " :" + msg + "\n";
+			std::cout << "to__send    "<<to_send << std::endl;
+			sendMsg(it->first, to_send);
+			return;
+		}	
 	}
-	sendMsg(fds[i].fd, "Destination not found!! \n");
-
 }
 
 
