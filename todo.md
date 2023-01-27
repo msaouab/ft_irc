@@ -13,6 +13,7 @@
 8. [x] Fixing Makefile
 9. [] Sending messages : multi targets: split with ,
 10. [] update all send with the correct syntax  
+11. OCF in all classes
 
 
 

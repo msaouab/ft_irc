@@ -14,6 +14,7 @@ class Bot
 	public:
 		Bot();
 		~Bot();
+		//OCF
 		void	FIND(std::map<int, Client>myClient, char *input, int i);
 		void	TIME(std::map<int, Client>myClient, char *input, int i);
 		void	HELP(std::map<int, Client>myClient, char *input, int i);

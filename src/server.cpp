@@ -139,16 +139,18 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 {
 	std::string message;
 	pass = pass.substr(5, pass.length());
-	message = "Incorrect Password\n";
+	message = ":localhost 464 PASS :Password incorrect\n";
 	if(pass != password) 
 	{
 		myGuest[fds[i].fd].setAuth(false);
 		sendMsg(fds[i].fd, message);
 		return ;
     }
-		std::cout << "Fd in pass " << fds[i].fd << std::endl;
-		myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
-		myGuest[fds[i].fd].setAuth(true);
+	if(myGuest[fds[i].fd].getAuth())
+		sendMsg(fds[i].fd,":localhost 462 PASS :You may not reregister\n");
+	std::cout << "Fd in pass " << fds[i].fd << std::endl;
+	myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
+	myGuest[fds[i].fd].setAuth(true);
 }
 
 void	server::Check_nick(std::string nick, int i)
@@ -165,8 +167,8 @@ void	server::Check_nick(std::string nick, int i)
 		sendMsg(fds[i].fd, hash);
 		return ;
 	}
-	message = "this nickname already exist\n";
 	nick = nick.substr(5, nick.length());
+	message = ":localhost 433 * " + nick + " :Nickname is already in use\n";
 	std::map<int, Client>::iterator it;
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
 		if (it->second.getNick() == nick) {
@@ -325,7 +327,6 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 	sendMsg(destination_fd, "\n");
 	sendMsg(source_fd, "Message sent !\n");
 }
-
 
 void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on channels
 {
