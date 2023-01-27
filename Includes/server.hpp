@@ -34,6 +34,7 @@ class server
 		server();
 		server(int _port, std::string _pswd);
 		~server();
+		//OCF
 
 		int			getPort() const;
 		std::string	getPassword() const;

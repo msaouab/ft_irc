@@ -8,6 +8,8 @@ server::server()
 }
 
 server::server(int _port, std::string _pswd) {
+	if (_port < 6665 || _port > 6669)
+		throw server::ErrorPortException();
 	this->port = _port;
 	this->password = _pswd;
 	this->n_fds = 1;
@@ -137,16 +139,18 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 {
 	std::string message;
 	pass = pass.substr(5, pass.length());
-	message = "Incorrect Password\n";
+	message = ":localhost 464 PASS :Password incorrect\n";
 	if(pass != password) 
 	{
 		myGuest[fds[i].fd].setAuth(false);
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
     }
-		std::cout << "Fd in pass " << fds[i].fd << std::endl;
-		myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
-		myGuest[fds[i].fd].setAuth(true);
+	if(myGuest[fds[i].fd].getAuth())
+		sendMsg(fds[i].fd,":localhost 462 PASS :You may not reregister\n");
+	std::cout << "Fd in pass " << fds[i].fd << std::endl;
+	myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
+	myGuest[fds[i].fd].setAuth(true);
 }
 
 void	server::Check_nick(std::string nick, int i)
@@ -155,20 +159,20 @@ void	server::Check_nick(std::string nick, int i)
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	std::string hash = "Please remove #/$ from your name\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	if(std::count(nick.begin(), nick.end(), '#') || std::count(nick.begin(), nick.end(), '&'))
 	{
-		sendMsg(fds[i].fd, hash, RED);
+		sendMsg(fds[i].fd, hash);
 		return ;
 	}
-	message = "this nickname already exist\n";
 	nick = nick.substr(5, nick.length());
+	message = ":localhost 433 * " + nick + " :Nickname is already in use\n";
 	std::map<int, Client>::iterator it;
 	for (it = myGuest.begin(); it != myGuest.end(); it++) {
 		if (it->second.getNick() == nick) {
-			sendMsg(fds[i].fd, message, RED);
+			sendMsg(fds[i].fd, message);
 			return ;
 		}
 	}
@@ -186,12 +190,12 @@ void	server::Check_user(std::string user, int i)
 	message = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	message = "Please enter your NICK before USER :)\n";
 	if (myGuest[fds[i].fd].getNick() == "") {
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	user = user.substr(5, user.length());
@@ -199,7 +203,7 @@ void	server::Check_user(std::string user, int i)
 	if (lenArr(userArr) < 4) {
 		ft_free(userArr);
 		message = "Command: USER.\nParameters: <username> <hostname> <servername> <realname>.\n";
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	myGuest[fds[i].fd].setUser(userArr[0]);
@@ -219,7 +223,7 @@ void	server::Check_quit(int i)
 {
 	std::string	message;
 	message = "You are leaving the server.\nsee you later :)\n";
-	sendMsg(fds[i].fd, message, GREEN);
+	sendMsg(fds[i].fd, message);
 	myGuest.erase(fds[i].fd);
 	myClient.erase(fds[i].fd);
 	std::map<int, Client>::iterator it;
@@ -240,22 +244,19 @@ void 	server::Check_admin(int i)
 {
 	std::string auterror;
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
-	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
+	if (!myClient[fds[i].fd].getAuth()) {
+		sendMsg(fds[i].fd, auterror);
 		return ;
 	}
-	std::string message;
-	// std::map<int, Client>::iterator it = myClient.begin();
-	// message = RED;
-	message.append(": 256 . :Your IRC server administrator's nickname is \r\n");
-	// message.append(it->second.getNick());
-	// message.append("\n");
-	// message.append(ED);
-	send(fds[i].fd, message.c_str(), message.length(), 0);
+	std::map<int, Client>::iterator it = myClient.begin();
+	std::string message1,message2,message3,message4;
+	message1.append(":localhost 256 " + myClient[fds[i].fd].getNick() + " :Administrative info about localhost\n");
+	message2 = ":localhost 257 " + myClient[fds[i].fd].getNick() + " :" + it->second.getNick() + " is in Khouribga, Morocco\n";
+	message1 = message1.append(message2);
+	sendMsg(fds[i].fd,message1);
 	return ;
 	
 }
-
 
 std::string printTime(void)
 {
@@ -267,169 +268,161 @@ std::string printTime(void)
 	time = tv.tv_sec;
 	info = localtime(&time);
 	_time.append(asctime(info));
+	_time.append("\n");
 	return(_time);
 }
 
-
 void server::Check_time(int i)
 {
-	std::string p = ":391 . :Today is ";
+	std::string p = ":localhost 391 " + this->getNick() + " localhost :Today is ";
 	p.append(printTime());
-	send(fds[i].fd, p.c_str(), p.length(), 0);
+	size_t il = 0;
+	while (il != p.length())
+		il +=send(fds[i].fd, p.c_str(), p.length() - il, 0);
 }
 
 void 	server::Check_who(std::string input, int i) // add who for operators
 {
 	std::string auterror;
-	std::string notFound;
+	std::string start,end;
+	input = input.substr(4, input.length() - 4);
+	std::map<int, Client>::iterator it;
 	auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
-	notFound = ":localhost 352 " + this->getNick() + " :USER not found\r\n";
+	end = ":localhost 315 " + myClient[fds[i].fd].getNick() + " " + input + " :END of /WHO list.\r\n";
 	if (!myGuest[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
-		sendMsg(fds[i].fd, ":localhost 315 " + this->getNick() + " :END of /WHO list\r\n", RED);
+		sendMsg(fds[i].fd, auterror);
 		return ;
 	}
-	std::string message;
-	std::map<int, Client>::iterator it;
-	input = input.substr(4, input.length() - 4);
 	for (it = myClient.begin(); it != myClient.end(); it++) {
 		if (it->second.getNick() == input)
 		{
-			message = YELLOW;
-			message.append("WHO request: Nickname ");
-			message.append(it->second.getNick());
-			message.append(" Username ");
-			message.append(it->second.getUser());
-			message.append(" And the real name is ");
-			message.append(it->second.getRealname());
-			send(fds[i].fd, message.c_str(), message.length(), 0);
-			message = "\n";
-			message.append(ED);
-			send(fds[i].fd, message.c_str(), message.length(), 0);
+			start = ":localhost 325 " + myClient[fds[i].fd].getNick() + " * ~" + it->second.getUser() + " " + it->second.getIP()\
+			+ " localhost " + myClient[fds[i].fd].getNick() + " H:0 " + it->second.getRealname() + ".\n";
+			sendMsg(fds[i].fd, start.append(end));
 			return ;
 		}
 	}
-	sendMsg(fds[i].fd, notFound, RED);
+	sendMsg(fds[i].fd, end);
 	return ;
 }
 
-void server::single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message)
+void server::single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message)//DELETE LATER!!
 {
 	std::string prefix = " Message from ";
 	prefix.append(source);
 	prefix.append(" ");
-	sendMsg(destination_fd, printTime(), GRAY);
-	sendMsg(destination_fd, prefix, RED);
-	sendMsg(destination_fd, message, ED);
-	sendMsg(destination_fd, "\n", RED);
-	sendMsg(source_fd, "Message sent !\n", RED);
+	sendMsg(destination_fd, printTime());
+	sendMsg(destination_fd, prefix);
+	sendMsg(destination_fd, message);
+	sendMsg(destination_fd, "\n");
+	sendMsg(source_fd, "Message sent !\n");
 }
-
 
 void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on channels
 {
-	std::string syntax = ":" + myClient[fds[i].fd].getNick() + " " + input + "\n";
-	std::string	message;
+	std::string	message,to_send;
 	char **data;
 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
+		sendMsg(fds[i].fd, auterror);
 		return ;
 	}
 	message = "412 ERR_NOTEXTTOSEND :No text to send\n";
-	input = input.substr(8, input.length());
+	input = input.substr(7, input.length());
 	data = ft_split(input.c_str(), ' ');
 	if (lenArr(data) < 2) 
 	{
 		ft_free(data);
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	std::map<int, Client>::iterator it;
 	std::string destination = data[0];
 	std::string msg;
-	int n = 0;
-	while(data[++n])
+	if (data[1][0] == ':')
 	{
-		msg.append(data[n]);
-		msg.append(" ");
-	}
-	ft_free(data);
-	if(msg[0] == ':')
+		int n = 0;
+		while(data[++n])
+		{
+			msg.append(data[n]);
+			msg.append(" ");
+		}
 		msg = msg.substr(1, msg.length() - 1);
-	for (it = myClient.begin(); it != myClient.end(); it++){
+	}
+	else 
+		msg = data[1];
+	ft_free(data);
+	for (it = myClient.begin(); it != myClient.end(); it++)
+	{
 		if (it->second.getNick() == destination)
 		{
-			size_t i = 0;
-			while (i != syntax.length())
-				i +=send(it->first, syntax.c_str(), syntax.length() - i, 0);
-			std::cout << i << " " << syntax.length() << std::endl;
-			std::cout << syntax << std::endl;
-			return ;
-		}
-			
+			to_send = ":" + myClient[fds[i].fd].getNick() + " PRIVMSG " + destination + " :" + msg + "\n";
+			sendMsg(it->first, to_send);
+			return;
+		}	
 	}
 	std::map<std::string, Channel>::iterator itChann;
 	std::string chan_msg = GREEN + destination + " " + ED + msg;
 	for(itChann = channels.begin(); itChann != channels.end(); itChann++)
 	{
-		if (itChann->second.getName() == destination)
+		if (itChann->second.getName() == destination && destination != this->getNick())
 		{
 			for (it = itChann->second.usersChann.begin() ; it != itChann->second.usersChann.end(); it++)
-				single_prvmsg(fds[i].fd, it->first, myClient[fds[i].fd].getNick(), chan_msg);
+			{	
+				if (itChann->second.getName() == myClient[fds[i].fd].getNick())
+					it++;
+				to_send = ":" + myClient[fds[i].fd].getNick() + " PRIVMSG " + destination + " :" + msg + "\n";
+				sendMsg(it->first, to_send);
+			}
 			return ;
 		}
 	}
-	sendMsg(fds[i].fd, ":localhost 401 ERR_NOSUCHNICK :channel\r\n", RED);
+	sendMsg(fds[i].fd, ":localhost 401 ERR_NOSUCHNICK :channel\r\n");
 }
 
 void	server::Check_notice(std::string input, int i)
 {
-  	std::string	message;
+  	std::string	message,to_send;
 	char **data;
 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
-		sendMsg(fds[i].fd, auterror, RED);
+		sendMsg(fds[i].fd, auterror);
 		return ;
 	}
 	message = "NOTICE: Syntax Error\n";
-	input = input.substr(7, input.length());
+	input = input.substr(6, input.length());
 	data = ft_split(input.c_str(), ' ');
-	if (lenArr(data) < 2 || data[1][0] != ':') 
+	if (lenArr(data) < 2) 
 	{
 		ft_free(data);
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 		return ;
 	}
 	std::map<int, Client>::iterator it;
 	std::string destination = data[0];
 	std::string msg;
-	int n = 0;
-	while(data[++n])
+	if (data[1][0] == ':')
 	{
-		msg.append(data[n]);
-		msg.append(" ");
+		int n = 0;
+		while(data[++n])
+		{
+			msg.append(data[n]);
+			msg.append(" ");
+		}
+		msg = msg.substr(1, msg.length() - 1);
 	}
+	else 
+		msg = data[1];
 	ft_free(data);
-	msg = msg.substr(1, msg.length() - 1);
-	// std::map<std::string, Channel> channels;
 	for (it = myClient.begin(); it != myClient.end(); it++)
 	{
 		if (it->second.getNick() == destination)
 		{
-			std::string prefix = " Notice from ";
-			prefix.append(myClient[fds[i].fd].getNick());
-			prefix.append(":\t");
-			sendMsg(it->first, printTime(), GRAY);
-			sendMsg(it->first, prefix, RED);
-			sendMsg(it->first, msg, ED);
-			sendMsg(it->first, "\n", RED);
-			sendMsg(fds[i].fd, "Notice sent !\n", RED);
-		}
-			
+			to_send = ":" + myClient[fds[i].fd].getNick() + " NOTICE " + destination + " :" + msg + "\n";
+			sendMsg(it->first, to_send);
+			return;
+		}	
 	}
-	sendMsg(fds[i].fd, "Destination not found!! \n", RED);
-
 }
 
 
@@ -437,7 +430,7 @@ void	server::Check_notice(std::string input, int i)
 // {
 // 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 // 	if (!myClient[fds[i].fd].getAuth()) {
-// 		sendMsg(fds[i].fd, auterror, RED);
+// 		sendMsg(fds[i].fd, auterror);
 // 		return ;
 // 	}
 // 	std::string	message = "DCC: NOT SUPPORTED!!\n";
@@ -449,7 +442,7 @@ void	server::Check_notice(std::string input, int i)
 // 	else if (!input.compare(0, 6, "REJECT") && input.length() > 6)
 // 		dcc_reject(input, i);
 // 	else
-// 		sendMsg(fds[i].fd, message, RED);
+// 		sendMsg(fds[i].fd, message);
 
 // }
 
@@ -459,7 +452,7 @@ void server::joinToChannel(std::string name, int fd)
 	std::string message = "hola in channel name's ";
 	message.append(name);
 	message.append("\n");
-	sendMsg(fds[fd].fd, message, GREEN);
+	sendMsg(fds[fd].fd, message);
 	int i = 0;
 	std::map<int, Client>::iterator it;
 	std::map<std::string, Channel>::iterator itChann;
@@ -506,7 +499,7 @@ void server::joinToChannel(std::string name, int fd)
 	message.append(name);
 	message.append(" and fd is: ");
 	message.append("\n");
-	sendMsg(fds[fd].fd, message , GREEN);
+	sendMsg(fds[fd].fd, message );
 }
 
 void server::createChannel(std::string name, int chec, int fd)
@@ -528,7 +521,7 @@ void server::createChannel(std::string name, int chec, int fd)
 		{
 			ft_free(chan);
 			message = "Wrong password\n";
-			sendMsg(fds[i].fd, message, RED);
+			sendMsg(fds[i].fd, message);
 			/// *************************************************** USE ft_free **********************************************************
 			return ;
 		}
@@ -558,7 +551,7 @@ void server::Check_join(std::string join, int fd)
 	{
 		/// *************************************************** USE ft_free **********************************************************
 		ft_free(chan);
-		sendMsg(fds[i].fd, "name of channel invalid", RED);
+		sendMsg(fds[i].fd, "name of channel invalid");
 		return ;
 	}
 	if (chan[1] && chan[1][0] == '&')
@@ -567,7 +560,7 @@ void server::Check_join(std::string join, int fd)
 		{
 			// std::cout << "password test" <<std::endl;
 			message = "Please enter password\n";
-			sendMsg(fds[fd].fd, message, RED);
+			sendMsg(fds[fd].fd, message);
 			ft_free(chan);
 			/// *************************************************** USE ft_free **********************************************************
 			
@@ -594,7 +587,7 @@ void server::Check_join(std::string join, int fd)
 					ft_free(chan);
 					/// *************************************************** USE ft_free **********************************************************
 					message = "Password is wrong\n";
-					sendMsg(fds[fd].fd, message, RED);
+					sendMsg(fds[fd].fd, message);
 					return ;
 				}
 			}
@@ -641,21 +634,21 @@ void server::check_users(std::string input, int fd)
 	if (itChann == channels.end())
 	{
 		std::string message = "Channel name's " + name + "not found \n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	it1 = itChann->second.usersChann.find(fds[fd].fd);
 	if (it1 == itChann->second.usersChann.end())
 	{
 		std::string message = "You are not member of channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	it1 = itChann->second.usersAcitve.find(fds[fd].fd);
 	if (it1 == itChann->second.usersAcitve.end())
 	{
 		std::string message = "You are not member of channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	for (it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
@@ -665,7 +658,7 @@ void server::check_users(std::string input, int fd)
 			message += " online\n";
 		else
 			message += " offline\n";
-		sendMsg(fds[fd].fd, message, GREEN);
+		sendMsg(fds[fd].fd, message);
 	}
 }
 
@@ -689,14 +682,14 @@ void server::check_exit_chan(std::string input, int fd)
 	if (itChann == channels.end())
 	{
 		std::string message = "Channel name's " + name + "not found \n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	it1 = itChann->second.usersChann.find(fds[fd].fd);
 	if (it1 == itChann->second.usersChann.end())
 	{
 		std::string message = "You are not member in channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	for(it = itChann->second.usersAcitve.begin(); it != itChann->second.usersAcitve.end(); it++)
@@ -707,7 +700,7 @@ void server::check_exit_chan(std::string input, int fd)
 	if (it == itChann->second.usersAcitve.end())
 	{
 		std::string message = "You are not online in channel " + name + "\n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	for(it1 = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it1++)
@@ -718,7 +711,7 @@ void server::check_exit_chan(std::string input, int fd)
 	it1->second.setJoinChan(false);
 	itChann->second.usersAcitve.erase(it->first);
 	message = "See you soon\n";
-	sendMsg(fds[fd].fd, message, RED);
+	sendMsg(fds[fd].fd, message);
 }
 
 void server::check_quit_chan(std::string input, int fd)
@@ -740,7 +733,7 @@ void server::check_quit_chan(std::string input, int fd)
 	if (itChann == channels.end())
 	{
 		std::string message = "Channel name's " + name + "not found \n";
-		sendMsg(fds[fd].fd, message, RED);
+		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	int i = 0;
@@ -775,7 +768,7 @@ void server::check_quit_chan(std::string input, int fd)
 	if (itChann->second.usersChann.size() == 0)
 		channels.erase(itChann->first);
 	std::string message = "You are now leave this channel\n";
-	sendMsg(fds[fd].fd, message, RED);
+	sendMsg(fds[fd].fd, message);
 }
 
 void	server::Parse_cmd(std::string input, int i)
@@ -783,7 +776,7 @@ void	server::Parse_cmd(std::string input, int i)
 	std::string	message;
 	std::cout << input << std::endl;
 
-	message = "Input not supported\n";
+	message = ":localhost 421 " + myClient[fds[i].fd].getNick() + " " + input + " :Unknown command\n";
 	if (!input.compare(0, 4, "PASS") && input.length() > 4)
 		Check_pass(input, password, i);
 	else if (!(input.compare(0, 4, "NICK")) && input.length() > 4)
@@ -810,12 +803,12 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_join(input, i);
 	else if (!(input.compare(0, 10, "LISTUSERCH")))
 		check_users(input, i);
-	else if (!(input.compare(0, 6, "EXITCH")))
+	else if (!(input.compare(0, 6, "EXITCH")))//CHANGE EXITCH to PART
 		check_exit_chan(input, i);
-	else if (!(input.compare(0 , 6, "CHQUIT")))
+	else if (!(input.compare(0 , 6, "CHQUIT")))//DELETE THIS
 		check_quit_chan(input, i);
 	else
-		sendMsg(fds[i].fd, message, RED);
+		sendMsg(fds[i].fd, message);
 }
 
 bool	server::recvMessage(int i)
@@ -824,7 +817,6 @@ bool	server::recvMessage(int i)
 	std::string	input;
 	
 	rc = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
-	std::cout << "buff : " << buffer << std::endl;
 	if (rc < 0) {
 		if (errno != EWOULDBLOCK) {
 			std::cout << "recv() failed: " << strerror(errno) << std::endl;
@@ -893,5 +885,5 @@ void	server::start()
 
 const char* server::ErrorPortException::what() const throw()
 {
-	return("\033[1;31m Error in Port number \033[0m");
+	return("\033[1;31m Error in Port number. The range is 6665-6669 \033[0m");
 }

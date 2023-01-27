@@ -42,6 +42,6 @@
 bool		isNumber(std::string str);
 int			lenArr(char **arr);
 void		ft_free(char **arr);
-void		sendMsg(int fd, std::string msg, std::string color);
+void		sendMsg(int fd, std::string msg);
 
 #endif /* _IRC_SERV_HPP__ */
