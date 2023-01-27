@@ -251,15 +251,12 @@ void 	server::Check_admin(int i)
 	std::map<int, Client>::iterator it = myClient.begin();
 	std::string message1,message2,message3,message4;
 	message1.append(":localhost 256 " + myClient[fds[i].fd].getNick() + " :Administrative info about localhost\n");
-	// sendMsg(fds[i].fd,message1);
-	message2 = ":localhost 257 " + myClient[fds[i].fd].getNick() + " :" + it->second.getNick() + " is in Khouribga, Morocco\n";
 	message2 = ":localhost 257 " + myClient[fds[i].fd].getNick() + " :" + it->second.getNick() + " is in Khouribga, Morocco\n";
 	message1 = message1.append(message2);
 	sendMsg(fds[i].fd,message1);
 	return ;
 	
 }
-
 
 std::string printTime(void)
 {
@@ -274,13 +271,6 @@ std::string printTime(void)
 	_time.append("\n");
 	return(_time);
 }
-
-
-/*:nickname PRIVMSG <target> <msg> \r\n
-error syntax: 412 ERR_NOTEXTTOSEND :<message> \r\n
-error target: 401 ERR_NOSUCHNICK " + target + "  :<message>\r\n
-
-421 ERR_UNKNOWNCOMMAND " + <cmd> + " :<message>\r\n"*/
 
 void server::Check_time(int i)
 {
@@ -316,7 +306,7 @@ void 	server::Check_who(std::string input, int i) // add who for operators
 	return ;
 }
 
-void server::single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message)
+void server::single_prvmsg(int source_fd, int destination_fd, std::string source, std::string message)//DELETE LATER!!
 {
 	std::string prefix = " Message from ";
 	prefix.append(source);
@@ -330,8 +320,7 @@ void server::single_prvmsg(int source_fd, int destination_fd, std::string source
 
 void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on channels
 {
-	std::string syntax = ":" + myClient[fds[i].fd].getNick() + " " + input + "\n";
-	std::string	message;
+	std::string	message,to_send;
 	char **data;
 	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n";
 	if (!myClient[fds[i].fd].getAuth()) {
@@ -339,7 +328,7 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 		return ;
 	}
 	message = "412 ERR_NOTEXTTOSEND :No text to send\n";
-	input = input.substr(8, input.length());
+	input = input.substr(7, input.length());
 	data = ft_split(input.c_str(), ' ');
 	if (lenArr(data) < 2) 
 	{
@@ -350,24 +339,27 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 	std::map<int, Client>::iterator it;
 	std::string destination = data[0];
 	std::string msg;
-	int n = 0;
-	while(data[++n])
+	if (data[1][0] == ':')
 	{
-		msg.append(data[n]);
-		msg.append(" ");
-	}
-	ft_free(data);
-	if(msg[0] == ':')
-		msg = msg.substr(1, msg.length() - 1);
-	for (it = myClient.begin(); it != myClient.end(); it++){
-		if (it->second.getNick() == destination && destination != this->getNick())
+		int n = 0;
+		while(data[++n])
 		{
-			size_t i = 0;
-			while (i != syntax.length())
-				i +=send(it->first, syntax.c_str(), syntax.length() - i, 0);
-			return ;
+			msg.append(data[n]);
+			msg.append(" ");
 		}
-			
+		msg = msg.substr(1, msg.length() - 1);
+	}
+	else 
+		msg = data[1];
+	ft_free(data);
+	for (it = myClient.begin(); it != myClient.end(); it++)
+	{
+		if (it->second.getNick() == destination)
+		{
+			to_send = ":" + myClient[fds[i].fd].getNick() + " PRIVMSG " + destination + " :" + msg + "\n";
+			sendMsg(it->first, to_send);
+			return;
+		}	
 	}
 	std::map<std::string, Channel>::iterator itChann;
 	std::string chan_msg = GREEN + destination + " " + ED + msg;
@@ -376,10 +368,11 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 		if (itChann->second.getName() == destination && destination != this->getNick())
 		{
 			for (it = itChann->second.usersChann.begin() ; it != itChann->second.usersChann.end(); it++)
-			{		
-					size_t i = 0;
-					while (i != syntax.length())
-					i +=send(it->first, syntax.c_str(), syntax.length() - i, 0);
+			{	
+				if (itChann->second.getName() == myClient[fds[i].fd].getNick())
+					it++;
+				to_send = ":" + myClient[fds[i].fd].getNick() + " PRIVMSG " + destination + " :" + msg + "\n";
+				sendMsg(it->first, to_send);
 			}
 			return ;
 		}
@@ -421,13 +414,11 @@ void	server::Check_notice(std::string input, int i)
 	else 
 		msg = data[1];
 	ft_free(data);
-	std::cout << "msg   "<< msg << std::endl;
 	for (it = myClient.begin(); it != myClient.end(); it++)
 	{
 		if (it->second.getNick() == destination)
 		{
 			to_send = ":" + myClient[fds[i].fd].getNick() + " NOTICE " + destination + " :" + msg + "\n";
-			std::cout << "to__send    "<<to_send << std::endl;
 			sendMsg(it->first, to_send);
 			return;
 		}	
@@ -812,9 +803,9 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_join(input, i);
 	else if (!(input.compare(0, 10, "LISTUSERCH")))
 		check_users(input, i);
-	else if (!(input.compare(0, 6, "EXITCH")))
+	else if (!(input.compare(0, 6, "EXITCH")))//CHANGE EXITCH to PART
 		check_exit_chan(input, i);
-	else if (!(input.compare(0 , 6, "CHQUIT")))
+	else if (!(input.compare(0 , 6, "CHQUIT")))//DELETE THIS
 		check_quit_chan(input, i);
 	else
 		sendMsg(fds[i].fd, message);
