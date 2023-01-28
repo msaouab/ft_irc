@@ -362,11 +362,19 @@ void 	server::Check_privmsg(std::string input, int i) //TODO: user PRVIMSG on ch
 		}	
 	}
 	std::map<std::string, Channel>::iterator itChann;
+	std::map<int ,Client>::iterator it1;
 	std::string chan_msg = GREEN + destination + " " + ED + msg;
+	
 	for(itChann = channels.begin(); itChann != channels.end(); itChann++)
 	{
 		if (itChann->second.getName() == destination && destination != this->getNick())
 		{
+			it1 = itChann->second.usersChann.find(fds[i].fd);
+			if (it1 == itChann->second.usersChann.end())
+			{
+				sendMsg(fds[i].fd, ":localhost 403 "+ myClient[fds[i].fd].getNick() + " "+ destination + " :No such channel\n");
+				return ;
+			}
 			for (it = itChann->second.usersChann.begin() ; it != itChann->second.usersChann.end(); it++)
 			{	
 				if (itChann->second.getName() == myClient[fds[i].fd].getNick())
@@ -448,11 +456,7 @@ void	server::Check_notice(std::string input, int i)
 
 void server::joinToChannel(std::string name, int fd)
 {
-	std::cout << "fd is : " << fd << std::endl;
-	std::string message = "hola in channel name's ";
-	message.append(name);
-	message.append("\n");
-	sendMsg(fds[fd].fd, message);
+	std::string message;
 	int i = 0;
 	std::map<int, Client>::iterator it;
 	std::map<std::string, Channel>::iterator itChann;
@@ -479,12 +483,19 @@ void server::joinToChannel(std::string name, int fd)
 			break;
 		}
 	}
-	std::cout <<"jkldsjkldsjfkldsj" << std::endl;
+	for(it = itChann->second.listBan.begin(); it != itChann->second.listBan.end(); it++)
+	{
+		if (it->first == fds[fd].fd)
+		{
+			message = "localhost 474 JOIN " + itChann->second.getName() + " :Cannot join channel\n";
+			sendMsg(fds[fd].fd, message);
+			return ;
+		}
+	}
 	cl1.setJoinChan(true);
-	// 	it->second.setJoinChan(true);
 	if (i == 0)
 	{
-		itChann->second.modes.insert(std::pair<int, std::string>(fds[fd].fd, "-a+r+w-b-o+i"));
+		itChann->second.modes.insert(std::pair<int, std::string>(fds[fd].fd, "-O-o+r+w-b+i-k-K"));
 		itChann->second.usersChann.insert(std::pair<int, Client>(fds[fd].fd, cl1));
 	}
 	it = itChann->second.usersChann.find(fds[fd].fd);
@@ -492,14 +503,14 @@ void server::joinToChannel(std::string name, int fd)
 	{
 		it->second.setJoinChan(true);
 	}
-	// cl1.setJoinChan(true);
 	itChann->second.usersAcitve.insert(std::pair<int, Client>(fds[fd].fd, it->second));
-	// std::cout << "hola in channel name's: " << name << "and fd is : " << fd <<std::endl;
-	message = "hola in channel name's ";
-	message.append(name);
-	message.append(" and fd is: ");
-	message.append("\n");
-	sendMsg(fds[fd].fd, message );
+	message = ":" + it->second.getNick() + " JOIN :" + itChann->second.getName() + "\n";
+	sendMsg(fds[fd].fd, message);
+	// add_op_chan(name + " +r", fd);
+	
+
+	check_users("NAMES "+name, fd);
+	// names names names;
 }
 
 void server::createChannel(std::string name, int chec, int fd)
@@ -509,98 +520,98 @@ void server::createChannel(std::string name, int chec, int fd)
 	{
 			Channel c1 = Channel(name, "public", "nopass");
 			std::map<int, Client>::iterator it;
-			c1.modes.insert(std::pair<int, std::string>(fds[fd].fd, "all"));
+			c1.modes.insert(std::pair<int, std::string>(fds[fd].fd, "+O+o+r+w+b+i+k+K"));
 			channels.insert(std::pair<std::string, Channel>(name, c1));
 			joinToChannel(name, fd);
 	}
-	else
-	{
-		std::string message;
-		char **chan = ft_split(name.c_str(), ' ');
-		if (!chan[1])
-		{
-			ft_free(chan);
-			message = "Wrong password\n";
-			sendMsg(fds[i].fd, message);
-			/// *************************************************** USE ft_free **********************************************************
-			return ;
-		}
-		name = chan[0];
-		std::string pas = chan[1];
-		Channel c1 = Channel(name, "private", pas);
-		std::string type = "private";
-		pas = chan[1];
-		ft_free(chan);
-		c1.setType(type);
-		std::string modess = "all";
-		c1.modes.insert(std::pair<int, std::string>(fds[fd].fd, modess));
-		channels.insert(std::pair<std::string, Channel>(name, c1));
-		joinToChannel(name, fd);
-		/// *************************************************** USE ft_free **********************************************************
-	}
+	// else
+	// {
+	// 	std::string message;
+	// 	char **chan = ft_split(name.c_str(), ' ');
+	// 	if (!chan[1])
+	// 	{
+	// 		ft_free(chan);
+	// 		message = "Wrong password\n";
+	// 		sendMsg(fds[i].fd, message);
+	// 		/// *************************************************** USE ft_free **********************************************************
+	// 		return ;
+	// 	}
+	// 	name = chan[0];
+	// 	std::string pas = chan[1];
+	// 	Channel c1 = Channel(name, "private", pas);
+	// 	std::string type = "private";
+	// 	pas = chan[1];
+	// 	ft_free(chan);
+	// 	c1.setType(type);
+	// 	std::string modess = "+O+o+r+w+b+i+k+K";
+	// 	c1.modes.insert(std::pair<int, std::string>(fds[fd].fd, modess));
+	// 	channels.insert(std::pair<std::string, Channel>(name, c1));
+	// 	joinToChannel(name, fd);
+	// 	/// *************************************************** USE ft_free **********************************************************
+	// }
 
 }
 
 void server::Check_join(std::string join, int fd)
 {
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myGuest[fds[fd].fd].getAuth()) {
+		sendMsg(fds[fd].fd, auterror);
+		return ;
+	}
 	int checker = 0;
 	char **chan = ft_split(join.c_str(), ' ');
 	std::string name = chan[1], message;
-	std::map<std::string , Channel>::iterator it;
-	if (chan[1][0] != '#' && chan[1][0] != '&' && name.length() > 200)
+	std::string enough = ":localhost 461 " + myClient[fds[fd].fd].getNick() + " JOIN :Not enough parameters\n";
+	std::string param = chan[1];
+	if (lenArr(chan) < 2 || lenArr(chan) > 3 || (param.c_str()[0] != '#'))
 	{
-		/// *************************************************** USE ft_free **********************************************************
 		ft_free(chan);
-		sendMsg(fds[i].fd, "name of channel invalid");
+		sendMsg(fds[fd].fd, ":localhost 403 "+ myClient[fds[fd].fd].getNick() + " "+ name + " :No such channel\n");
 		return ;
 	}
-	if (chan[1] && chan[1][0] == '&')
+	std::map<std::string , Channel>::iterator it;
+	if (chan[1][0] != '#' && name.length() > 200)
 	{
-		if (!chan[2])
-		{
-			// std::cout << "password test" <<std::endl;
-			message = "Please enter password\n";
-			sendMsg(fds[fd].fd, message);
 			ft_free(chan);
-			/// *************************************************** USE ft_free **********************************************************
-			
+			 message = ":localhost 403 "+ myClient[fds[fd].fd].getNick() + " "+ name + " :No such channel\n";
+			sendMsg(fds[fd].fd, message);
 			return ;
-		}
-		std::string psd = chan[2];
-		std::cout << psd << std::endl;
-		std::cout << "jkldsjfklds" << psd << std::endl;
-		for (it = channels.begin(); it != channels.end(); it++)
-		{
-			std::cout << it->second.getName() << "fjdsklfjkldsfjdklsfjdkls"<< name << psd <<std::endl;
-			if (it->first == name)
-			{
-				std::cout << "youssef irc " << it->second.getPassword() << std::endl;
-				if (it->second.getPassword() == psd)
-				{
-					std::cout << "hollllllllllla" << std::endl;
-					free(chan);
-					joinToChannel(name, fd);
-					return ;
-				}
-				else
-				{
-					ft_free(chan);
-					/// *************************************************** USE ft_free **********************************************************
-					message = "Password is wrong\n";
-					sendMsg(fds[fd].fd, message);
-					return ;
-				}
-			}
-			// else
-			// {
-			// }
-		}
-		checker = 1;
-		name.append(" ");
-		name.append(psd);
 	}
-	else
-	{
+	// if (chan[1] && chan[1][0] == '&')
+	// {
+	// 	if (!chan[2])
+	// 	{
+			
+	// 		sendMsg(fds[fd].fd, enough);
+	// 		return ;
+	// 	}
+	// 	std::string psd = chan[2];
+	// 	std::cout << psd << std::endl;
+	// 	for (it = channels.begin(); it != channels.end(); it++)
+	// 	{
+	// 		if (it->first == name)
+	// 		{
+	// 			if (it->second.getPassword() == psd)
+	// 			{
+	// 				free(chan);
+	// 				joinToChannel(name, fd);
+	// 				return ;
+	// 			}
+	// 			else
+	// 			{
+	// 				ft_free(chan);
+	// 				sendMsg(fds[fd].fd, ":localhost 464 " + myClient[fds[fd].fd].getNick() + " JOIN :Password incorrect\n");
+	// 				return ;
+	// 			}
+	// 		}
+	// 	}
+	// 	checker = 1;
+	// 	name.append(" ");
+	// 	name.append(psd);
+	// }
+	// if(chan[1] && chan[1][0] == '#')
+	// {
 		
 		for (it = channels.begin(); it != channels.end(); it++)
 		{
@@ -608,62 +619,76 @@ void server::Check_join(std::string join, int fd)
 			{
 					ft_free(chan);
 					joinToChannel(name, fd);
-					/// *************************************************** USE ft_free **********************************************************
 					return ;
 			}
 		}
-	}
+	// }
 	createChannel(name, checker, fd);
 }
 
 void server::check_users(std::string input, int fd)
 {
+	int i = 0;
+	std::string message;
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myGuest[fds[fd].fd].getAuth()) {
+		sendMsg(fds[fd].fd, auterror);
+		return ;
+	}
 	char **chan = ft_split(input.c_str(), ' ');
 	if (!chan || !chan[1])
+	{
 		return ;
+	}
 	std::string name = chan[1];
 	ft_free(chan);
 	std::map<int, Client>::iterator it;
 	std::map<int, Client>::iterator it1;
+	std::map<int, std::string>::iterator itmode;
 	std::map<std::string, Channel>::iterator itChann;
+	std::vector<std::string> myvector;
 	for (itChann = channels.begin(); itChann != channels.end(); itChann++)
 	{
 		if (name == itChann->first)
-			break;
+			break ;
 	}
 	if (itChann == channels.end())
 	{
-		std::string message = "Channel name's " + name + "not found \n";
+		std::string message = ":localhost 366 " + myClient[fds[fd].fd].getNick() + " " + name + " :End of /NAMES list.\n";
 		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	it1 = itChann->second.usersChann.find(fds[fd].fd);
 	if (it1 == itChann->second.usersChann.end())
 	{
-		std::string message = "You are not member of channel " + name + "\n";
-		sendMsg(fds[fd].fd, message);
-		return ;
-	}
-	it1 = itChann->second.usersAcitve.find(fds[fd].fd);
-	if (it1 == itChann->second.usersAcitve.end())
-	{
-		std::string message = "You are not member of channel " + name + "\n";
+		std::string message = ":localhost 353 " + myClient[fds[fd].fd].getNick() + " = " + name + " :\n";
 		sendMsg(fds[fd].fd, message);
 		return ;
 	}
 	for (it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
 	{
-		std::string message = std::to_string(it->first) + " " + it->second.getNick();
-		if (it->second.getJoinChan())
-			message += " online\n";
-		else
-			message += " offline\n";
-		sendMsg(fds[fd].fd, message);
+		if (i == 0)
+			message = ":localhost 353 " + myClient[fds[fd].fd].getNick() + " = " + itChann->second.getName() + " :" ;
+		myvector.push_back(it->second.getNick());
+	
+		std::cout << myvector.at(i) << std::endl;
+		i++;
 	}
+	while(--i)
+		message.append(myvector.at(i) + " ");
+
+	std::cout << message << std::endl;
+	sendMsg(fds[fd].fd, message.append("@" + myvector.front() + "\n"));
+	sendMsg(fds[fd].fd, ":localhost 366 " + myClient[fds[fd].fd].getNick() + " " + itChann->second.getName()+ " :End of /NAMES list.\n");
 }
 
 void server::check_exit_chan(std::string input, int fd)
 {
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myGuest[fds[i].fd].getAuth()) {
+		sendMsg(fds[i].fd, auterror);
+		return ;
+	}
 	char **chan = ft_split(input.c_str(), ' ');
 	if (!chan && !chan[1])
 		return ;
@@ -716,15 +741,22 @@ void server::check_exit_chan(std::string input, int fd)
 
 void server::check_quit_chan(std::string input, int fd)
 {
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myGuest[fds[fd].fd].getAuth()) {
+		sendMsg(fds[fd].fd, auterror);
+		return ;
+	}
 	char **chan = ft_split(input.c_str(), ' ');
 	if (!chan || !chan[1])
+	{
+		sendMsg(fds[fd].fd, ":localhost 461 " + myClient[fds[fd].fd].getNick() + " PART :Not enough parameters\n");
 		return ;
+	}
 	std::string name = chan[1];
 	ft_free(chan);
 	std::map<int, std::string>::iterator it;
 	std::map<int, Client>::iterator it1;
 	std::map<std::string, Channel>::iterator itChann;
-	std::cout << "que mera bobos que mera bobos que mera bobos" << std::endl;
 	for (itChann = channels.begin(); itChann != channels.end(); itChann++)
 	{
 		if (name == itChann->first)
@@ -732,43 +764,199 @@ void server::check_quit_chan(std::string input, int fd)
 	}
 	if (itChann == channels.end())
 	{
-		std::string message = "Channel name's " + name + "not found \n";
-		sendMsg(fds[fd].fd, message);
+		sendMsg(fds[fd].fd, ":localhost 403 "+ myClient[fds[fd].fd].getNick() + " "+ name + " :No such channel\n");
 		return ;
 	}
-	int i = 0;
-	for (it = itChann->second.modes.begin(); it != itChann->second.modes.end(); it++)
+	// int i = 0;
+	// for (it = itChann->second.modes.begin(); it != itChann->second.modes.end(); it++)
+	// {
+	// 	if (it->second == "all")
+	// 		i++;
+	// }
+	// if (i == 1)
+	// {
+	for (it1 = itChann->second.usersChann.begin(); it1 != itChann->second.usersChann.end(); it1++)
 	{
-		if (it->second == "all")
-			i++;
+		if (it1->first == fds[fd].fd)
+			break ;
 	}
-	if (i == 1)
+	if (it1 == itChann->second.usersChann.end())
 	{
-		for (it1 = itChann->second.usersChann.begin(); it1 != itChann->second.usersChann.end(); it1++)
-		{
-			if (it1->first == fds[fd].fd)
-				break ;
-		}
-		if (it1 == itChann->second.usersChann.end())
-		{
-			std::cout << "You are not exist in channel members" << std::endl;
-			return ;
-		}
-		it1++;
-		it = itChann->second.modes.find(it1->first);
-		if (it != itChann->second.modes.end())
-			it->second = "all";
+		sendMsg(fds[fd].fd, ":localhost 442 "+ myClient[fds[fd].fd].getNick() + " "+ name + " :You're not on that channel\n");
+		return ;
 	}
+	// 	it1++;
+	// 	it = itChann->second.modes.find(it1->first);
+	// 	if (it != itChann->second.modes.end())
+	// 		it->second = "all";
+	// }
 	itChann->second.modes.erase(fds[fd].fd);
 	itChann->second.usersChann.erase(fds[fd].fd);
 	// it1->second.setJoinChan(false);
-	it1 = itChann->second.usersAcitve.find(fd);
-	if (it1 != itChann->second.usersAcitve.end())
-		itChann->second.usersAcitve.erase(fd);
+	// it1 = itChann->second.usersAcitve.find(fd);
+	// if (it1 != itChann->second.usersAcitve.end())
+	// 	itChann->second.usersAcitve.erase(fd);
 	if (itChann->second.usersChann.size() == 0)
 		channels.erase(itChann->first);
-	std::string message = "You are now leave this channel\n";
+	std::string message = ":" + myClient[fds[fd].fd].getNick() + " PART " + name +"\n";
 	sendMsg(fds[fd].fd, message);
+}
+
+int server::findMember(std::string namech, std::string nick)
+{
+	std::map<int, Client>::iterator it;
+	std::map<std::string, Channel>::iterator itChann;
+	std::map<int, std::string>::iterator itmode;
+	std::string message;
+	for(itChann = channels.begin(); itChann != channels.end(); itChann++)
+	{
+		if (itChann->first == namech)
+			break;
+	}
+	for(it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
+	{
+		if(it->second.getNick() == nick)
+		{
+			std::cout << "findmember: " << it->first << std::endl;
+			return it->first;
+		}
+	}
+	return(0);
+}
+
+int checkmode(std::string m)
+{
+	if (m != "+O" && m != "-O" 
+		&& m != "+o" && m != "-o" 
+		&& m != "+w" && m != "-w" && 
+		m != "+b" && m != "-b" && 
+		m != "+r" && m != "-r" && 
+		m != "+i" && m != "-i" &&
+		m != "+K" && m != "-K" &&
+		m != "+k" && m != "-k")
+		return (0);
+	return (1);
+}
+
+void	server::add_op_chan(std::string input, int fd)
+{
+	std::string auterror = "You need to login so you can start chatting OR you can send HELP to see how :)\n> ";
+	if (!myGuest[fds[i].fd].getAuth()) {
+		sendMsg(fds[i].fd, auterror);
+		return ;
+	}
+	char **chan = ft_split(input.c_str(), ' ');
+	if (!chan || !chan[1] || !chan[2] || !chan[3])
+	{
+		std::string message = ":localhost 461 " + myClient[fds[i].fd].getNick() + " MODE :Not enough parameters\n";
+		sendMsg(fds[fd].fd, message);
+		return ;
+	}
+	std::string name = chan[1];
+	std::string nick = chan[2];
+	std::string strmode = chan[3];
+	std::map<int, Client>::iterator it;
+	std::map<std::string, Channel>::iterator itChann;
+	std::map<int, std::string>::iterator itmode;
+	std::string message;
+	if (checkmode(strmode) == 0)
+	{
+		message = ":Unknown MODE flag\n";
+		sendMsg(fds[fd].fd, message);
+		return ;
+	}
+	for(itChann = channels.begin(); itChann != channels.end(); itChann++)
+	{
+		if (itChann->first == name)
+			break;
+	}
+	if (itChann == channels.end())
+	{
+		message = "This " + name + " channels is not exist\n";
+		sendMsg(fds[fd].fd, message);
+		return ;
+	}
+	for(it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
+	{
+		if (it->first == fds[fd].fd)
+			break;
+	}
+	if (it == itChann->second.usersChann.end())
+	{
+		message = "You are not member in channel " + name + "\n";
+		sendMsg(fds[fd].fd, message);
+		return ;
+	}
+	for(it = itChann->second.usersAcitve.begin(); it != itChann->second.usersAcitve.end(); it++)
+	{
+		if (it->first == fds[fd].fd)
+			break;
+	}
+	if (it == itChann->second.usersAcitve.end())
+	{
+		message = "You are not online in channel " + name + "\n";
+		sendMsg(fds[fd].fd, message);
+		return ;
+	}
+	for(it = itChann->second.listBan.begin(); it != itChann->second.listBan.end(); it++)
+	{
+		if (it->first == fds[fd].fd)
+		{
+			message = "You are not member in channel " + name + "\n";
+			sendMsg(fds[fd].fd, message);
+			return ;
+		}
+	}
+	int id = findMember(name, nick);
+	if (id == 0)
+	{
+		message = "This client " + nick + " not found\n";
+		sendMsg(fds[fd].fd, message);
+		return ;
+	}
+	for (itmode = itChann->second.modes.begin(); itmode != itChann->second.modes.end(); itmode++)
+	{
+		if (itmode->first == id)
+			break;
+	}
+	char c = chan[3][0];
+	std::string str = chan[3];
+	std::cout << "char c = " << c << " and str = " << str <<" mode of client is : " << itmode->second <<std::endl;
+	std::size_t found;
+	if (c == '+')
+	{
+			std::string str1 = "+";
+			std::string str2 = "-";
+			str.erase(str.begin());
+			str1.append(str);
+			str2.append(str);
+			std::cout << "char c = " << c << " and str = " << str2 << std::endl;
+			found = itmode->second.find(str2);
+			if (found != std::string::npos)
+				itmode->second.replace(found, str2.length(), str1);
+	}
+	else
+	{
+			std::string str1 = "-";
+			std::string str2 = "+";
+			str.erase(str.begin());
+			str1.append(str);
+			str2.append(str);
+			std::cout << "char c = " << c << " and str = " << str2 << std::endl;
+			found = itmode->second.find(str2);
+			if (found != std::string::npos)
+				itmode->second.replace(found, str2.length(), str1);
+	}
+	for (itmode = itChann->second.modes.begin(); itmode != itChann->second.modes.end(); itmode++)
+	{
+		if (itmode->first == id)
+		{
+			message = itmode->second + "\n";
+			sendMsg(fds[fd].fd, message);
+			return ;
+		}
+	}
+	ft_free(chan);
 }
 
 void	server::Parse_cmd(std::string input, int i)
@@ -801,12 +989,15 @@ void	server::Parse_cmd(std::string input, int i)
 		CreateBot(myClient, input, fds[i].fd);
 	else if (!(input.compare(0, 4, "JOIN")))
 		Check_join(input, i);
-	else if (!(input.compare(0, 10, "LISTUSERCH")))
+	else if (!(input.compare(0, 5, "NAMES")))
 		check_users(input, i);
-	else if (!(input.compare(0, 6, "EXITCH")))//CHANGE EXITCH to PART
-		check_exit_chan(input, i);
-	else if (!(input.compare(0 , 6, "CHQUIT")))//DELETE THIS
+	// else if (!(input.compare(0, 6, "EXITCH")))//CHANGE EXITCH to PART
+	// 	check_exit_chan(input, i);
+	else if (!(input.compare(0 , 4, "PART")))//DELETE
 		check_quit_chan(input, i);
+	// else if (!(input.compare(0, 4, "MODE")))//MODE
+	// 	// add_op_chan(input, i);
+	// 	std::cout << "jflkdsfjdklsjfkl" << std::endl;
 	else
 		sendMsg(fds[i].fd, message);
 }

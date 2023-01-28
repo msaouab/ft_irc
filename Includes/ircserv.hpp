@@ -31,6 +31,7 @@
 # include <sys/types.h>
 # include <netdb.h>
 # include <arpa/inet.h>
+# include <vector>
 
 # include "./server.hpp"
 # include "./Client.hpp"
