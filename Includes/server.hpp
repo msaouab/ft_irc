@@ -72,6 +72,7 @@ class server
 		void		check_exit_chan(std::string input, int fd);
 		void		check_quit_chan(std::string input, int fd);
 		void		add_op_chan(std::string input, int fd);
+		void		kick_chan(std::string input, int fd);
 		int			findMember(std::string namech, std::string nick);
 
 		//channel end
