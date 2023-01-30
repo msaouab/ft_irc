@@ -32,6 +32,7 @@
 # include <netdb.h>
 # include <arpa/inet.h>
 # include <vector>
+# include <string>
 
 # include "./server.hpp"
 # include "./Client.hpp"

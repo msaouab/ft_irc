@@ -66,7 +66,7 @@ class server
 		void 		dcc_send(std::string input, int i);
 		//channel start
 		void		Check_join(std::string join, int fd);
-		void		createChannel(std::string name, int chec, int fd);
+		void		createChannel(std::string name, int fd);
 		void		joinToChannel(std::string name, int fd);
 		void 		check_users(std::string input, int i);
 		void		check_exit_chan(std::string input, int fd);
