@@ -16,6 +16,7 @@ class Channel
         std::map<int, Client> listBan; //list of users is bann 
         std::map<int, std::string> modes;//add modes
         std::map<int, Client> usersAcitve;
+        std::map<int, Client> invite_list;//List of invited users
         Channel(std::string name);
         Channel(std::string name, std::string mode);
         ~Channel();
