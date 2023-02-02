@@ -4,27 +4,14 @@ Channel::Channel(std::string name)
 {
     if (name.length() < 200)
         this->name = name;
-    
-    // this->sujet = sujet;
-    // std::vector<std::string>::iterator it;
-    
-    // for (it = modes.begin(); it != modes.end(); it++)
-    // {
-    //     if (*it == "+p")
-    //     {
-    //         std::cout << "jkfhdjkshfdsh"
-    //     }
-    // }
 }
 
-Channel::Channel(std::string  name, std::string type, std::string pass)
+Channel::Channel(std::string  name, std::string mode)
 {
     if (name.length() < 200)
     {
         this->name = name;
-        this->type = type;
-        if (this->type == "private")
-            this->password = pass;
+        this->modeChan = mode;
     }
 }
 
@@ -37,22 +24,39 @@ void Channel::setType(std::string type)
 {
     this->type = type;    
 }
+void Channel::setModeChan(std::string mode)
+{
+    this->modeChan = mode;
+}
 
-std::string Channel::getPassword()
+void Channel::setSize(int size)
+{
+    this->sizeOfUsers = size;
+}
+
+std::string Channel::getPassword() const
 {
     return (this->password);
 }
 
-std::string Channel::getName()
+std::string Channel::getName() const
 {
     return (this->name);
 }
 
-std::string Channel::getType() 
+std::string Channel::getType()  const
 {
     return (this->type);
 }
+std::string Channel::getModeChan()
+{
+    return (this->modeChan);
+}
 
+int Channel::getSizeOfUsers() const
+{
+    return (this->sizeOfUsers);
+}
 Channel::~Channel()
 {
 }
