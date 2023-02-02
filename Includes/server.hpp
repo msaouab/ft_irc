@@ -76,9 +76,8 @@ class server
 		void		mode_Arr_Three(char **chan, int fd);
 		void		mode_Arr_Two(char **chan, int fd);
 		void 		mode_Arr_four(char **chan , int fd);
-
 		int			findMember(std::string namech, std::string nick);
-
+		void		Check_invite(std::string input, int i);
 		//channel end
 
 		//COMMANDS TO PARS END
