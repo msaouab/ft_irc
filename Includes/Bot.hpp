@@ -17,7 +17,7 @@ class Bot
 		//OCF
 		void	FIND(std::map<int, Client>myClient, char *input, int i);
 		void	TIME(std::map<int, Client>myClient, char *input, int i);
-		void	HELP(std::map<int, Client>myClient, char *input, int i);
+		void	HELP(std::map<int, Client>myClient, int i);
 };
 
 void	CreateBot(std::map<int, Client>myClient, std::string cmd, int i);

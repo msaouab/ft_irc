@@ -48,7 +48,7 @@ std::string		server::getNick() const {
 
 void	server::CreateSocket()
 {
-	int					opt;
+	int	opt;
 
 	opt = 1;
 	sock_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -112,6 +112,8 @@ int	server::acceptSocket(int n_fds)
 {
 	int	new_sd;
 	std::string	ip_addr;
+	struct timeval tv;
+	time_t	time;
 
 	new_sd = -1;
 	while (new_sd == -1) {
@@ -123,17 +125,16 @@ int	server::acceptSocket(int n_fds)
 			}
 			break ;
 		}
-		// std::string welcome = _welcomemsg(new_sd);
+		gettimeofday(&tv, NULL);
+		time = tv.tv_sec;
+		myGuest[new_sd].setTime(time);
 		std::cout << "New incomming connection ==> " << new_sd << std::endl;
 		ip_addr = inet_ntoa(address.sin_addr);
 		myGuest[new_sd].setIP(ip_addr);
-		// if (send(new_sd, welcome.c_str(), welcome.length(), 0) <= 0)
-		// 	std::cout << strerror(errno);
 		fds[n_fds].fd = new_sd;
 		fds[n_fds].events = POLLIN;
 		n_fds++;
 	}
-	//CHECK IF SEG here
 	return (n_fds);
 }
 
@@ -229,8 +230,8 @@ void	server::Check_user(std::string user, int i)
 		myClient[fds[i].fd] = myGuest[fds[i].fd];
 		myGuest[fds[i].fd].setLog(true);
 	}
-	// std::string welcome = _welcomemsg(fds[i].fd);
-	// send(fds[i].fd,welcome.c_str(), welcome.length(), 0);
+	std::string welcome = _welcomemsg(fds[i].fd);
+	send(fds[i].fd,welcome.c_str(), welcome.length(), 0);
 
 	ft_free(userArr);
 }
@@ -238,7 +239,7 @@ void	server::Check_user(std::string user, int i)
 void	server::Check_quit(int i)
 {
 	std::string	message;
-	message = "You are leaving the server.\nsee you later :)\n";
+	message = "You are leaving the server. see you later :)\n";
 	sendMsg(fds[i].fd, message);
 	myGuest.erase(fds[i].fd);
 	myClient.erase(fds[i].fd);
@@ -249,9 +250,6 @@ void	server::Check_quit(int i)
 		itChan->second.usersAcitve.erase(fds[i].fd);
 		itChan->second.usersChann.erase(fds[i].fd);
 		itChan->second.modes.erase(fds[i].fd);
-	}
-	for (it = myGuest.begin(); it != myGuest.end(); it++) {
-		std::cout << it->second.getClientfd() << " ==> " << it->second.getNick() << std::endl;
 	}
 	close(fds[i].fd);
 }
@@ -1623,7 +1621,7 @@ void	server::Parse_cmd(std::string input, int i)
 		Check_notice(input, i);
 	// else if (!(input.compare(0, 3, "DCC")) && input.length() > 3)
 	// 	Check_dcc(input, i);
-	else if (!(input.compare(0, 4, "/BOT")) && input.length() > 4)
+	else if (!(input.compare(0, 3, "BOT")) && input.length() > 3)
 		CreateBot(myClient, input, fds[i].fd);
 	else if (!(input.compare(0, 4, "JOIN")))
 		Check_join(input, i);
@@ -1649,6 +1647,8 @@ bool	server::recvMessage(int i)
 	rc = recv(fds[i].fd, buffer, DEFAULT_BUFLEN, 0);
 	if (rc < 0) {
 		if (errno != EWOULDBLOCK) {
+			myGuest.erase(fds[i].fd);
+			// Check_quit(i);
 			std::cout << "recv() failed: " << strerror(errno) << std::endl;
 			st_conx = true;
 		}
@@ -1656,7 +1656,7 @@ bool	server::recvMessage(int i)
 	}
 	if (rc == 0) {
 		std::cout << "Connection closed" << std::endl;
-		myGuest.erase(fds[i].fd);
+		Check_quit(i);
 		st_conx = true;
 		return (false);
 	}
@@ -1671,7 +1671,7 @@ void	server::start()
 {
 	int					current_size;
 	bool				compress_arr;
-	int					i;
+	int					i = 0;
 
 	n_fds = 1;
 	current_size = 0;
@@ -1687,18 +1687,13 @@ void	server::start()
 			if (fds[i].revents == 0)
 				continue ;
 			if (fds[i].fd == sock_fd) {
-				std::cout << "Listening Socker is readable\n" << std::endl;
+				// std::cout << "Listening Socker is readable\n" << std::endl;
 				n_fds = acceptSocket(n_fds);
 			}
 			else {
 				std::cout << "Discriptor " << fds[i].fd << " is readable\n" << std::endl;
 				st_conx = false;
 				recvMessage(i);
-				// while (true) {
-				// 	if (recvMessage(i) == false)
-				// 		break ;
-				// 	// sendMessage();
-				// }
 				while (true) {
 					if (recvMessage(i) == false)
 						break ;

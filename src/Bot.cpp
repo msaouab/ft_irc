@@ -1,5 +1,6 @@
 
 #include "../Includes/Bot.hpp"
+# include "../Includes/server.hpp"
 
 Bot::Bot() {
 }
@@ -13,6 +14,10 @@ std::string	getPost(std::string input)
 	std::string	c;
 	char	**addr;
 
+	if (input == "127.0.0.1") {
+		post = "from localHost: 127.0.0.1";
+		return post;
+	}
 	addr = ft_split(input.c_str(), '.');
 	c = addr[1][1];
 	post = "e";
@@ -36,22 +41,22 @@ void	Bot::FIND(std::map<int, Client>myClient, char *input, int fd)
 			message = "This person in <";
 			message.append(getPost(myClient[it->first].getIP()));
 			message.append(">\n");
-			sendMsg(fd, message);
+			sendMsg(fd, ":BOT NOTICE " + myClient[fd].getNick() + " :" + message);
 			return ;
 		}
 	}
 	message = "Incorrect Nickname: ";
 	message.append(input);
-	sendMsg(fd, message);
+	sendMsg(fd, ":localhost 401 ERR_NOSUCHNICK :BOT: No such user\r\n");
 }
 
 void	Bot::TIME(std::map<int, Client>myClient, char *input, int fd)
 {
-	(void)input;
+	server s;
 	std::string message;
 	char buffer[64];
 	struct timeval tv;
-	long	time;
+	long	time = 0;
 	long	newTime;
 
 	gettimeofday(&tv, NULL);
@@ -61,7 +66,10 @@ void	Bot::TIME(std::map<int, Client>myClient, char *input, int fd)
 		if (myClient[it->first].getNick() == input)
 			time = myClient[it->first].getTime();
 	}
-
+	if (time == 0) {
+		sendMsg(fd, ":localhost 401 ERR_NOSUCHNICK :BOT: No such user\r\n");
+		return ;
+	}
 	newTime = newTime - time;
 	struct tm *info = localtime(&newTime);
 	strftime (buffer, sizeof(buffer), "%T", info);
@@ -70,8 +78,24 @@ void	Bot::TIME(std::map<int, Client>myClient, char *input, int fd)
 	message.append(" <");
 	message.append(buffer);
 	message.append(">\n");
-	sendMsg(fd, message);
-	std::cout << buffer << std::endl;
+	sendMsg(fd, ":BOT NOTICE " + myClient[fd].getNick() + " :" + message);
+}
+
+void	Bot::HELP(std::map<int, Client>myClient, int fd)
+{
+	std::string message;
+
+	message = "BOT :help - Prints this help message\n";
+	if (!myClient[fd].getAuth()) {
+		message.append("First thing you need to do is a enter the Commands to complet Connection Registration\n");
+		message.append("PASS - password Server\n");
+		message.append("NICK - <nickname> your Nickname\n");
+		message.append("USER - your <username> <hostname> <servername> <realname>\n");
+	}
+	message.append("TIME - Show the current time\n");
+	message.append("BOT :logtime - How much time connected in the server\n");
+	message.append("BOT :find - find the Imac any one with you in the server\n");
+	sendMsg(fd, ":BOT NOTICE " + myClient[fd].getNick() + " :" + message);
 }
 
 void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
@@ -81,11 +105,11 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 	std::string	message;
 	userArr = ft_split(cmd.c_str(), ' ');
 	message.append("Please check '/BOT :help' for more information.\n");
-	// if (strcmp(userArr[1], ":help") == 0) {
-	// 	bot.HELP(myClient, userArr[2], fd);
-	// 	ft_free(userArr);
-	// 	return ;
-	// }
+	if (strcmp(userArr[1], ":help") == 0) {
+		bot.HELP(myClient, fd);
+		ft_free(userArr);
+		return ;
+	}
 	if (lenArr(userArr) != 3) {
 		ft_free(userArr);
 		sendMsg(fd, message);
@@ -99,20 +123,3 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 		sendMsg(fd, message);
 	ft_free(userArr);
 }
-
-// void	Bot::CreateBot(int port)
-// {
-// 	int	client_fd;
-// 	sockBot = socket(AF_INET, SOCK_STREAM, 0);
-// 	if (sockBot < 0) {
-// 		std::cout << "Bot Socket() failed: " << strerror(errno) << std::endl;
-// 		exit(EXIT_FAILURE);
-// 	}
-// 	addrBot.sin_family = AF_INET;
-// 	addrBot.sin_port = htons(port);
-// 	client_fd = connect(sockBot, (struct sockaddr *)&addrBot, addrLenBot);
-// 	if (client_fd < 0)
-// 		std::cout << "Connection failed" << std::endl;
-// 	std::cout << "Bot Connection" << std::endl;
-// 	// sendMsg()
-// }

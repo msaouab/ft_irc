@@ -6,7 +6,7 @@
 
 
 # define MAX_CLIENT 17
-# define TIMEOUT (10 * 60 * 1000)
+# define TIMEOUT (50 * 60 * 1000)
 # define DEFAULT_BUFLEN 512
 
 class	Client;
