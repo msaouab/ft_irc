@@ -46,7 +46,7 @@ std::string		server::getNick() const {
 
 void	server::CreateSocket()
 {
-	int					opt;
+	int	opt;
 
 	opt = 1;
 	sock_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -136,6 +136,7 @@ int	server::acceptSocket(int n_fds)
 	return (n_fds);
 }
 
+
 bool	server::recvMessage(int i)
 {
 	char		buffer[DEFAULT_BUFLEN];
@@ -167,7 +168,7 @@ void	server::start()
 {
 	int					current_size;
 	bool				compress_arr;
-	int					i;
+	int					i = 0;
 
 	n_fds = 1;
 	current_size = 0;
@@ -183,7 +184,6 @@ void	server::start()
 			if (fds[i].revents == 0)
 				continue ;
 			if (fds[i].fd == sock_fd) {
-				// std::cout << "Listening Socket is readable\n" << std::endl;
 				n_fds = acceptSocket(n_fds);
 			}
 			else {

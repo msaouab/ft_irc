@@ -13,6 +13,7 @@ std::string	getPost(std::string input)
 	std::string	post;
 	std::string	c;
 	char	**addr;
+
 	if (input == "127.0.0.1") {
 		post = "from localHost: 127.0.0.1";
 		return post;
@@ -65,12 +66,10 @@ void	Bot::TIME(std::map<int, Client>myClient, char *input, int fd)
 		if (myClient[it->first].getNick() == input)
 			time = myClient[it->first].getTime();
 	}
-
 	if (time == 0) {
 		sendMsg(fd, ":localhost 401 ERR_NOSUCHNICK :BOT: No such user\r\n");
 		return ;
 	}
-
 	newTime = newTime - time;
 	struct tm *info = localtime(&newTime);
 	strftime (buffer, sizeof(buffer), "%T", info);
@@ -124,3 +123,5 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 		sendMsg(fd, message);
 	ft_free(userArr);
 }
+
+

@@ -8,7 +8,6 @@ std::string	server::_welcomemsg(int fd)
     welcome.append("002 " + myClient[fd].getNick() + " :Greetings, fellow chatter! Welcome to our lovely IRC community.\n");
     welcome.append("003 " + myClient[fd].getNick() + " :If you need any help, simply type Bot :help for a list of available commands.\n");
     welcome.append("004 " + myClient[fd].getNick() + " :We're glad to have you here, let's make some memories!\n");
-    return (welcome);
 	return (welcome);
 }
 
