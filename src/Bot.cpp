@@ -85,16 +85,28 @@ void	Bot::HELP(std::map<int, Client>myClient, int fd)
 {
 	std::string message;
 
-	message = "BOT :help - Prints this help message\n";
+	message = ":BOT NOTICE " + myClient[fd].getNick() + " :BOT :help - Prints this help message\n";
 	if (!myClient[fd].getAuth()) {
-		message.append("First thing you need to do is a enter the Commands to complet Connection Registration\n");
-		message.append("PASS - password Server\n");
-		message.append("NICK - <nickname> your Nickname\n");
-		message.append("USER - your <username> <hostname> <servername> <realname>\n");
+		message.append(":BOT NOTICE " + myClient[fd].getNick() + " :First thing you need to do is a enter the Commands to complet Connection Registration\n");
+		message.append(":BOT NOTICE " + myClient[fd].getNick() + " :PASS - password Server\n");
+		message.append(":BOT NOTICE " + myClient[fd].getNick() + " :NICK - <nickname> your Nickname\n");
+		message.append(":BOT NOTICE " + myClient[fd].getNick() + " :USER - your <username> <hostname> <servername> <realname>\n");
 	}
-	message.append("TIME - Show the current time\n");
-	message.append("BOT :logtime - How much time connected in the server\n");
-	message.append("BOT :find - find the Imac any one with you in the server\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :ADMIN - Show the Server Administrator\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :TIME - Show the current time\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :WHO <nickname> - Show some extra Infos about the user\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :PRIVMSG <user/channel> <message> - Send a private message to your target (user/channel)\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :NOTICE <user> <message> - Send a notice to your target (user) *ONLY WORKS WITH USERS*\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :JOIN <channel> - Obviously to join a channel\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :NAMES <channel> - List all users joined in the channel\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :PART <channel> - Leave the channel\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :MODE <channel> - Moderate the channel\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :KICK <user> <channel> - SHOW THE DICTATOR INSIDE YOU\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :INVITE <user> <channel> - Kindly invite your friends to a joined channel\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :******************** AND BECAUSE OUR BOT CAN DO MORE ******************\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :**BOT :logtime <nickname> - How much time connected in the server******\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :**BOT :find <nickname> - find the Imac any one with you in the server**\n");
+	message.append(":BOT NOTICE " + myClient[fd].getNick() + " :***********************************************************************\n");
 	sendMsg(fd, ":BOT NOTICE " + myClient[fd].getNick() + " :" + message);
 }
 
@@ -104,15 +116,15 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 	char		**userArr;
 	std::string	message;
 	userArr = ft_split(cmd.c_str(), ' ');
-	message.append("Please check '/BOT :help' for more information.\n");
-	if (strcmp(userArr[1], ":help") == 0) {
+	message.append("Please check 'BOT :help' for more information.\n");
+	if (lenArr(userArr) == 2 && strcmp(userArr[1], ":help") == 0) {
 		bot.HELP(myClient, fd);
 		ft_free(userArr);
 		return ;
 	}
 	if (lenArr(userArr) != 3) {
 		ft_free(userArr);
-		sendMsg(fd, message);
+		sendMsg(fd, ":BOT NOTICE " + myClient[fd].getNick() + " :" + message);
 		return ;
 	}
 	if (strcmp(userArr[1], ":find") == 0)
@@ -120,7 +132,7 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 	else if (strcmp(userArr[1], ":logtime") == 0)
 		bot.TIME(myClient, userArr[2], fd);
 	else
-		sendMsg(fd, message);
+		sendMsg(fd, ":BOT NOTICE " + myClient[fd].getNick() + " :" + message);
 	ft_free(userArr);
 }
 
