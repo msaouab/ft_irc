@@ -4,6 +4,11 @@
 
 void	server::Check_pass(std::string pass, std::string password, int i)
 {
+	if(myGuest[fds[i].fd].getAuth())
+	{
+		sendMsg(fds[i].fd,":localhost 462 PASS :You may not reregister\n");
+		return ;
+	}
 	if (pass.length() < 6)
 	{
 		sendMsg(fds[i].fd, ":localhost 461 PASS :Not enough parameters\n");
@@ -18,8 +23,6 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 		sendMsg(fds[i].fd, message);
 		return ;
     }
-	if(myGuest[fds[i].fd].getAuth())
-		sendMsg(fds[i].fd,":localhost 462 PASS :You may not reregister\n");
 	std::cout << "Fd in pass " << fds[i].fd << std::endl;
 	myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
 	myGuest[fds[i].fd].setAuth(true);
@@ -848,7 +851,7 @@ void server::mode_Arr_Three(char **chan, int fd)
 	ft_free(chan);
 }
 
-void		server::mode_Arr_Two(char **chan, int fd)
+void server::mode_Arr_Two(char **chan, int fd)
 {
 	std::map<std::string , Channel>::iterator itChann;
 	std::string namechan = chan[1];
@@ -1300,13 +1303,11 @@ void	server::add_op_chan(std::string input, int fd)
 		mode_Arr_Two(chan, fd);
 }
 
-
 void server::kick_chan(std::string input, int fd)
 {
 	char **chan = ft_split(input.c_str(), ' ');
 	if (!chan || !chan[1])
 	{
-		// sendMsg(fds[fd].fd, ":localhost 461 " + myClient[fds[fd].fd].getNick() + " MODE :Not enough parameters\n");
 		ft_free(chan);
 		return ;
 	}
@@ -1491,38 +1492,34 @@ void	server::Check_invite(std::string input, int i)
 	}
 	sendMsg(fds[i].fd, ":localhost 341 " + myClient[fds[i].fd].getNick() + " " + target + " " + namechan + "\n");
 	sendMsg(fds[i].fd, ":localhost NOTICE @" + namechan + " :"+ myClient[fds[i].fd].getNick() + " invited " + target + " into channel " + namechan + "\n");
-	// std::cout << target_fd << std::endl;
 	sendMsg(target_fd, ":" + myClient[fds[i].fd].getNick() + " INVITE " + target + " :" + namechan + "\n");
 	itChann->second.invite_list.insert(std::pair<int, Client>(target_fd, it->second));
 
 }
 
-
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
 	std::cout << input << std::endl;
-
 	message = ":localhost 421 "+ input + " :Unknown command\n";
 	if (!input.compare(0, 4, "PASS"))
 		Check_pass(input, password, i);
 	else if (!(input.compare(0, 4, "NICK")) )
 		Check_nick(input, i);
-	else if (!(input.compare(0, 4, "USER"))) //add in master + welcomemsg function
+	else if (!(input.compare(0, 4, "USER")))
 		Check_user(input, i);
-	else if (!(input.compare(0, 4, "QUIT"))) /// add in master
+	else if (!(input.compare(0, 4, "QUIT")))
 		Check_quit(i);
 	else if (!(input.compare(0, 5, "ADMIN")))
 		Check_admin(i);
 	else if (!(input.compare(0, 4, "TIME")))
 		Check_time(i);
-	else if (!(input.compare(0, 3, "WHO")))// add in mater
+	else if (!(input.compare(0, 3, "WHO")))
 		Check_who(input, i);
 	else if (!(input.compare(0, 7, "PRIVMSG")))
 		Check_privmsg(input, i);
 	else if (!(input.compare(0, 6, "NOTICE")))
 		Check_notice(input, i);
-	
 	else if (!(input.compare(0, 3, "BOT")))
 		CreateBot(myClient, input, fds[i].fd);
 	else if (!(input.compare(0, 4, "JOIN")))

@@ -1,6 +1,5 @@
 # include "../Includes/Client.hpp"
 
-// Client::Client() : Clientfd(0), nick(0), user(0) { }
 Client::Client() {
 	this->Auth = false;
 	this->Log = false;

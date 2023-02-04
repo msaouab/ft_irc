@@ -34,7 +34,6 @@ class server
 		server();
 		server(int _port, std::string _pswd);
 		~server();
-		//OCF
 
 		int			getPort() const;
 		std::string	getPassword() const;
@@ -60,10 +59,6 @@ class server
 		void 		Check_who(std::string input, int i);
 		void 		Check_privmsg(std::string input, int i);
 		void 		Check_notice(std::string input, int i);
-		void 		Check_dcc(std::string input, int i);
-		void 		dcc_accept(std::string input, int i);
-		void 		dcc_reject(std::string input, int i);
-		void 		dcc_send(std::string input, int i);
 		//channel start
 		void		Check_join(std::string join, int fd);
 		void		createChannel(std::string name, int fd);

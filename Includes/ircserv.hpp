@@ -39,8 +39,6 @@
 # include "./Bot.hpp"
 # include "./Channel.hpp"
 
-// struct sockaddr_in	address;
-
 bool		isNumber(std::string str);
 int			lenArr(char **arr);
 void		ft_free(char **arr);
