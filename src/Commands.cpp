@@ -440,7 +440,6 @@ void server::joinToChannel(std::string name, int fd)
 	cl1.setJoinChan(true);
 	if (i == 0)
 	{
-		// itChann->second.modes.insert(std::pair<int, std::string>(fds[fd].fd, ""));
 		itChann->second.usersChann.insert(std::pair<int, Client>(fds[fd].fd, cl1));
 	}
 	it = itChann->second.usersChann.find(fds[fd].fd);
@@ -599,6 +598,7 @@ void server::check_users(std::string input, int fd)
 	char **chan = ft_split(input.c_str(), ' ');
 	if (!chan || !chan[1])
 	{
+		ft_free(chan);
 		return ;
 	}
 	std::string enough = ":localhost 461 " + myClient[fds[fd].fd].getNick() + " JOIN :Not enough parameters\n";
@@ -606,6 +606,7 @@ void server::check_users(std::string input, int fd)
 	{
 		if(lenArr(chan) == 1)
 		{
+			ft_free(chan);
 			sendMsg(fds[fd].fd, enough);
 			return ;
 		}
@@ -614,6 +615,7 @@ void server::check_users(std::string input, int fd)
 			std::string namech = chan[1];
 			if (namech.size() == 1 && namech.c_str()[0] == '#')
 			{
+				ft_free(chan);
 				sendMsg(fds[fd].fd, enough);
 				return ;
 			}
@@ -650,8 +652,6 @@ void server::check_users(std::string input, int fd)
 		if (i == 0)
 			message = ":localhost 353 " + myClient[fds[fd].fd].getNick() + " = " + itChann->second.getName() + " :" ;
 		myvector.push_back(it->second.getNick());
-	
-		std::cout << myvector.at(i) << std::endl;
 		i++;
 	}
 	while(--i)
@@ -903,12 +903,12 @@ void		server::mode_Arr_Two(char **chan, int fd)
 	if (i == 0)
 	{
 		sendMsg(fds[fd].fd, ":localhost 324 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getModeChan()+"\n");
-		sendMsg(fds[fd].fd, ":localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime() +"\n");
+		sendMsg(fds[fd].fd, ":localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime());
 		ft_free(chan);
 		return ;
 
 	}
-	sendMsg(fds[fd].fd, "\n:localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime() +"\n");
+	sendMsg(fds[fd].fd, "\n:localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime());
 	ft_free(chan);
 	return;
 }
@@ -950,8 +950,6 @@ void server::mode_Arr_four(char **chan , int fd)
 	}
 	if (mode == "+l")
 	{
-		// if (fds[fd].fd == it->first)
-		// 			return;
 		if (!chan[3])
 		{
 			ft_free(chan);
@@ -999,8 +997,6 @@ void server::mode_Arr_four(char **chan , int fd)
 	}
 	else if (mode == "+k")
 	{
-		// if (fds[fd].fd == it->first)
-		// 			return;
 		it1 = itChann->second.modes.find(fds[fd].fd);
 		found = it1->second.find("+O");
 		if (found == std::string::npos)
@@ -1047,7 +1043,18 @@ void server::mode_Arr_four(char **chan , int fd)
 			{
 				if (fds[fd].fd == it->first)
 					return;
-				std::cout << "hola hola " << std::endl;
+				it1 = itChann->second.modes.find(fds[fd].fd);
+				found = it1->second.find("+O");
+				if (found == std::string::npos)
+				{
+					found =it1->second.find("+o");
+					if (found == std::string::npos)
+					{
+						sendMsg(fds[fd].fd, ":localhost 482 " + myClient[fds[fd].fd].getNick() + " " + namechan + " :You're not channel operator\n");
+						ft_free(chan);
+						return ;
+					}
+				}
 				it1 = itChann->second.modes.find(it->first);
 				if (it1 == itChann->second.modes.end())
 				{
@@ -1065,7 +1072,19 @@ void server::mode_Arr_four(char **chan , int fd)
 				}
 				else
 				{
-					// it1 = itChann->second.modes.find(it->first);
+					it1 = itChann->second.modes.find(fds[fd].fd);
+					found = it1->second.find("+O");
+					if (found == std::string::npos)
+					{
+						found =it1->second.find("+o");
+						if (found == std::string::npos)
+						{
+							sendMsg(fds[fd].fd, ":localhost 482 " + myClient[fds[fd].fd].getNick() + " " + namechan + " :You're not channel operator\n");
+							ft_free(chan);
+							return ;
+						}
+					}
+					it1 = itChann->second.modes.find(it->first);
 					found = it1->second.find("+O");
 					if (found == std::string::npos) 
 					{
@@ -1250,6 +1269,7 @@ void	server::add_op_chan(std::string input, int fd)
 	char **chan = ft_split(input.c_str(), ' ');
 	if (!chan || !chan[1])
 	{
+		ft_free(chan);
 		return ;
 	}
 	std::string name = chan[1];
@@ -1287,6 +1307,7 @@ void server::kick_chan(std::string input, int fd)
 	if (!chan || !chan[1])
 	{
 		// sendMsg(fds[fd].fd, ":localhost 461 " + myClient[fds[fd].fd].getNick() + " MODE :Not enough parameters\n");
+		ft_free(chan);
 		return ;
 	}
 	if(lenArr(chan) < 3 )
@@ -1470,7 +1491,7 @@ void	server::Check_invite(std::string input, int i)
 	}
 	sendMsg(fds[i].fd, ":localhost 341 " + myClient[fds[i].fd].getNick() + " " + target + " " + namechan + "\n");
 	sendMsg(fds[i].fd, ":localhost NOTICE @" + namechan + " :"+ myClient[fds[i].fd].getNick() + " invited " + target + " into channel " + namechan + "\n");
-	std::cout << target_fd << std::endl;
+	// std::cout << target_fd << std::endl;
 	sendMsg(target_fd, ":" + myClient[fds[i].fd].getNick() + " INVITE " + target + " :" + namechan + "\n");
 	itChann->second.invite_list.insert(std::pair<int, Client>(target_fd, it->second));
 
