@@ -123,3 +123,5 @@ void	CreateBot(std::map<int, Client>myClient, std::string cmd, int fd)
 		sendMsg(fd, message);
 	ft_free(userArr);
 }
+
+

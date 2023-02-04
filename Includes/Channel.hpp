@@ -10,6 +10,7 @@ class Channel
         std::string modeChan;
         std::string password;
         std::string sujet;
+        std::string time;
         int        sizeOfUsers;
     public:
         std::map<int, Client> usersChann; // for watch client of channel 
@@ -24,10 +25,12 @@ class Channel
         void setPassword (std::string pass);
         void setModeChan(std::string mode);
         void setSize(int size);
+        void setTime(std::string t);
         std::string getType() const;
         std::string getName() const;
         std::string getPassword() const;
-        std::string getModeChan() ;
+        std::string getModeChan() const;
+        std::string getTime() const;
         int getSizeOfUsers() const;
 
 };
