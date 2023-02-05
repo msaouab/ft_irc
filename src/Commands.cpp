@@ -1,4 +1,6 @@
 # include "../Includes/server.hpp"
+#include<sstream>
+#include <iostream>
 
 void	server::Check_pass(std::string pass, std::string password, int i)
 {
@@ -21,7 +23,7 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 		sendMsg(fds[i].fd, message);
 		return ;
     }
-	// std::cout << "Fd in pass " << fds[i].fd << std::endl;
+	std::cout << "Fd in pass " << fds[i].fd << std::endl;
 	myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
 	myGuest[fds[i].fd].setAuth(true);
 }
@@ -71,7 +73,7 @@ void	server::Check_user(std::string user, int i)
 	char	**userArr;
 	std::string	message;
 	message = ":localhost 451 * USER :You must finish connecting with pass and nickname first.\n";
-	// std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
+	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, message);
 		return ;
@@ -149,7 +151,6 @@ std::string printTime(void)
 	time = tv.tv_sec;
 	info = localtime(&time);
 	_time.append(asctime(info));
-	_time.append("\n");
 	return(_time);
 }
 
@@ -456,10 +457,17 @@ void server::joinToChannel(std::string name, int fd)
 
 void server::createChannel(std::string name, int fd)
 {
+	struct timeval tv;
+	std::string temp;
 	Channel c1 = Channel(name, " ");
 	std::map<int, Client>::iterator it;
 	c1.modes.insert(std::pair<int, std::string>(fds[fd].fd, "+O+o+v"));
-	c1.setTime(printTime());
+	std::stringstream ss;
+	gettimeofday(&tv, NULL);
+	long j = (long)tv.tv_sec;
+	ss << j;    
+	ss >> temp;  
+	c1.setTime(temp);
 	channels.insert(std::pair<std::string, Channel>(name, c1));
 	joinToChannel(name, fd);
 }
@@ -512,7 +520,7 @@ void server::Check_join(std::string join, int fd)
 	}
 	std::string name = chan[1], message;
 	std::string param = chan[1];
-	if (lenArr(chan) < 2 || lenArr(chan) > 3 || (param.c_str()[0] != '#'))
+	if (lenArr(chan) < 2 || (param.c_str()[0] != '#'))
 	{
 		ft_free(chan);
 		sendMsg(fds[fd].fd, ":localhost 403 "+ myClient[fds[fd].fd].getNick() + " "+ name + " :No such channel\n");
@@ -904,12 +912,13 @@ void server::mode_Arr_Two(char **chan, int fd)
 	if (i == 0)
 	{
 		sendMsg(fds[fd].fd, ":localhost 324 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getModeChan()+"\n");
-		sendMsg(fds[fd].fd, ":localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime());
+		sendMsg(fds[fd].fd, ":localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime()+"\n");
 		ft_free(chan);
 		return ;
 
 	}
-	sendMsg(fds[fd].fd, "\n:localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime());
+	std::string current_time;
+	sendMsg(fds[fd].fd, "\n:localhost 329 " + myClient[fds[fd].fd].getNick()+ " " + namechan + " " + itChann->second.getTime() +"\n");
 	ft_free(chan);
 	return;
 }
@@ -1028,6 +1037,7 @@ void server::mode_Arr_four(char **chan , int fd)
 	{
 		if (checkmode(mode) == 1)
 		{
+			
 			for(it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
 			{
 				if (it->second.getNick() == size)
@@ -1059,15 +1069,15 @@ void server::mode_Arr_four(char **chan , int fd)
 				it1 = itChann->second.modes.find(it->first);
 				if (it1 == itChann->second.modes.end())
 				{
-					found = it1->second.find("+O");
-					if (found == std::string::npos)
-					{
+					// found = it1->second.find("+O");
+					// if (found == std::string::npos)
+					// {
 						itChann->second.modes.insert(std::pair<int , std::string>(it->first, mode));
 						for(it = itChann->second.usersChann.begin(); it != itChann->second.usersChann.end(); it++)
 						{
 							sendMsg(it->first, ":" + myClient[fds[fd].fd].getNick() + " MODE "+ itChann->first + " " + mode + " " + size + "\n");
 						}
-					}
+					// }
 					ft_free(chan);
 					return ;
 				}
@@ -1162,7 +1172,7 @@ void server::mode_Arr_four(char **chan , int fd)
 				found = it1->second.find("+O");
 				if (found == std::string::npos)
 				{
-					found =it1->second.find("+o");
+					found = it1->second.find("+o");
 					if (found == std::string::npos)
 					{
 						sendMsg(fds[fd].fd, ":localhost 482 " + myClient[fds[fd].fd].getNick() + " " + namechan + " :You're not channel operator\n");
@@ -1498,7 +1508,7 @@ void	server::Check_invite(std::string input, int i)
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
-	std::cout << myGuest[fds[i].fd].getNick() << ": " << input << std::endl;
+	std::cout << input << std::endl;
 	message = ":localhost 421 "+ input + " :Unknown command\n";
 	if (!input.compare(0, 4, "PASS"))
 		Check_pass(input, password, i);
