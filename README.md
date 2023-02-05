@@ -41,7 +41,7 @@
 	- The file descriptor to be modified.
 	- The command to be executed, which is specified as a constant.
 	- An optional argument that is specific to the command.
-<!-- <div align="center"><img src="Images/Diagrame.png"></div> -->
+<div align="center"><img src="Images/Diagrame.png"></div>
 
 # 💪 Contributers
 
