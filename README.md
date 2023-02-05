@@ -2,7 +2,6 @@
 	Internet Relay Chat
 
 # Desciption
-
  - Internet Relay Chator IRC is a text-based communication protocol on the Internet.It offers real-time messaging that can be either public or private. Users can exchangedirect messages and join group channels.IRC clients connect to IRC servers in order to join channels. IRC servers are connected together to form a network.2
 
 # Summary:
@@ -23,10 +22,26 @@
 	- Then, we have to implement the commands that are specific to operators.
 
 ## Bonus part
-
  - Here are the extra features we added to our IRC server so it looks even more like and actual IRC server:
 	- Handle file transfer.
 	- Add a bot.
+
+### Socket();
+- The socket(): function shall create an unbound socket in a communications domain, and return a file descriptor that can be used in later function calls that operate on sockets.
+
+- The socket() function takes the following arguments:
+	- domain: Specifies the communications domain in which a socket is to be created we use AF_INET "Address Family Internet" the socket can communicate using IP addresses 'IPv4'.
+	- type: Specifies the type of socket, such as SOCK_STREAM for a reliable, stream-oriented connection or SOCK_DGRAM for a connectionless, datagram-oriented connection.
+	- protocol: Specifies a particular protocol to be used with the socket. Specifying a protocol of 0 causes socket() to use an unspecified default protocol appropriate for the requested socket type.
+
+### fcntl();
+- fcntl(): is a system call in Unix-like operating systems that is used to manipulate file descriptors. The file descriptor is a unique integer assigned to a file or other input/output (I/O) resource when it is opened. The fcntl function allows a process to change the properties of an open file descriptor, such as making it non-blocking, setting its close-on-exec flag, or changing its access modes.
+
+- The fcntl function takes three arguments:
+	- The file descriptor to be modified.
+	- The command to be executed, which is specified as a constant.
+	- An optional argument that is specific to the command.
+<div align="center"><img src="Images/Diagrame.png"></div>
 
 # 💪 Contributers
 

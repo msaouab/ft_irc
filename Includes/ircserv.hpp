@@ -33,6 +33,8 @@
 # include <arpa/inet.h>
 # include <vector>
 # include <string>
+# include<sstream>
+# include <iostream>
 
 # include "./server.hpp"
 # include "./Client.hpp"
