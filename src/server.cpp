@@ -1,8 +1,7 @@
 
 #include "../Includes/server.hpp"
 #include "../Includes/Bot.hpp"
-#include<sstream>  
-#include <iostream>  
+
 server::server() {
 }
 
@@ -79,7 +78,7 @@ void	server::bindThesocket()
 		close(sock_fd);
 		exit(EXIT_FAILURE);
 	}
-	rc = listen(sock_fd, 3);
+	rc = listen(sock_fd, MAX_CLIENT);
 	if (rc < 0) {
 		std::cout << "listen() failed: " << strerror(errno) << '\n';
 		close(sock_fd);

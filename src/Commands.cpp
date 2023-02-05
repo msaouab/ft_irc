@@ -1,6 +1,4 @@
 # include "../Includes/server.hpp"
-#include<sstream>
-#include <iostream>
 
 void	server::Check_pass(std::string pass, std::string password, int i)
 {
@@ -23,7 +21,7 @@ void	server::Check_pass(std::string pass, std::string password, int i)
 		sendMsg(fds[i].fd, message);
 		return ;
     }
-	std::cout << "Fd in pass " << fds[i].fd << std::endl;
+	// std::cout << "Fd in pass " << fds[i].fd << std::endl;
 	myGuest.insert(std::pair<int, Client>(fds[i].fd, Client()));
 	myGuest[fds[i].fd].setAuth(true);
 }
@@ -73,7 +71,7 @@ void	server::Check_user(std::string user, int i)
 	char	**userArr;
 	std::string	message;
 	message = ":localhost 451 * USER :You must finish connecting with pass and nickname first.\n";
-	std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
+	// std::cout << myGuest[fds[i].fd].getAuth() << std::endl;
 	if (!myGuest[fds[i].fd].getAuth()) {
 		sendMsg(fds[i].fd, message);
 		return ;
@@ -1500,7 +1498,7 @@ void	server::Check_invite(std::string input, int i)
 void	server::Parse_cmd(std::string input, int i)
 {
 	std::string	message;
-	std::cout << input << std::endl;
+	std::cout << myGuest[fds[i].fd].getNick() << ": " << input << std::endl;
 	message = ":localhost 421 "+ input + " :Unknown command\n";
 	if (!input.compare(0, 4, "PASS"))
 		Check_pass(input, password, i);
